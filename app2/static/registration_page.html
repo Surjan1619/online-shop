@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <style>
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .register-container {
+      background-color: #ffffff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      width: 350px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: #999;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background-color: #4a90e2;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #3a78c2;
+    }
+
+    .message {
+      margin-top: 10px;
+      color: red;
+      font-size: 13px;
+    }
+
+    .login-link {
+      margin-top: 15px;
+      display: block;
+      font-size: 14px;
+      color: #666;
+      text-decoration: none;
+    }
+
+    .login-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="register-container">
+  <h2>Register</h2>
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+  <button onclick="register()">Register</button>
+  <div class="message" id="message"></div>
+  <a href="/login" class="login-link">Already have an account? Login</a>
+</div>
+
+<script>
+  async function register() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+    const messageDiv = document.getElementById("message");
+
+    messageDiv.textContent = "";
+
+
+    if (!username || !password || !confirmPassword) {
+      messageDiv.textContent = "Please fill all fields.";
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      messageDiv.textContent = "Passwords do not match.";
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/registrate-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        messageDiv.style.color = "green";
+        messageDiv.textContent = "User registered successfully!";
+        setTimeout(() => {
+          window.location.href = "/login"; // редирект на логин
+        }, 1500);
+      } else {
+        messageDiv.style.color = "red";
+        messageDiv.textContent = data.detail || "Registration failed.";
+      }
+
+    } catch (err) {
+      messageDiv.style.color = "red";
+      messageDiv.textContent = "Error connecting to server.";
+      console.error(err);
+    }
+  }
+</script>
+
+</body>
+</html>

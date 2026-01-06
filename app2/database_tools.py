@@ -1,14 +1,19 @@
 from sqlalchemy import create_engine, String, Integer, Float, Boolean, DateTime, Text
-from sqlalchemy import ForeignKey, Numeric
+from sqlalchemy import ForeignKey, Numeric, func
 from sqlalchemy.orm import sessionmaker, DeclarativeBase,  Session
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional
-
+import os
+from typing import List
+import uuid
 
 engine = create_engine('sqlite:///shop_db.db')
-
+MEDIA_FOLDER = "media/images"
+os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
 from typing import List, Optional
+import uuid
+
 from sqlalchemy import String, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -62,22 +67,77 @@ class Image(Base):
 
 
 
-def create_user(userdata: User):
 
+def create_user(userdata: User):
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
         session.add(userdata)
         session.commit()
+        session.refresh(userdata)
         print("User created successfully")
+        return userdata.id
     except Exception as e:
         session.rollback()
-        return False
+        print("""
+        fes
+        fes
+        fes
+        """)
         print(e)
+        return False
+
     finally:
         session.close()
         print("Session closed")
-    return True
+
+
+def get_user_id(username):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        user = session.query.filter(User.username == username).first()
+        if not user:
+            return None
+        return user.id
+    finally:
+        session.close()
+
+
+def create_product(product : Product):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        session.add(product)
+        session.commit()
+        session.refresh(product)
+        print("Product created successfully")
+        return product.id
+    finally:
+        session.close()
+
+def create_image(imagedata: Image):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        session.add(imagedata)
+        session.commit()
+        session.refresh(imagedata)
+        print("Image data created successfully")
+        return imagedata.id
+    finally:
+        session.close()
+
+def get_random_products():
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        products = session.querry(Product).order_by(func.random()).limit(10).all()
+        return products
+
+    finally:
+        session.close()
+
 
 """
 producty uni 
