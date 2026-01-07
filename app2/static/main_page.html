@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elite Shop | Collection</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      color: var(--text-main);
+    }
+
+    /* Navigation */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 8%;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { font-size: 22px; font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: none; }
+
+    .nav-buttons button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+      margin-left: 10px;
+    }
+
+    .btn-add { background: var(--primary-color); color: white; border: none !important; }
+    .btn-add:hover { background: var(--primary-hover); }
+
+    /* Grid */
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 40px 8%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Product Card */
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-wrapper {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+
+    /* "View Details" overlay on hover */
+    .view-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(37, 99, 235, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: 0.3s;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      backdrop-filter: blur(2px);
+    }
+
+    .product-card:hover .view-overlay { opacity: 1; }
+    .product-card:hover .image-wrapper img { transform: scale(1.1); }
+
+    .info { padding: 20px; }
+    .info h3 { margin: 0 0 10px 0; font-size: 18px; font-weight: 600; color: var(--text-main); }
+    .price { color: var(--primary-color); font-weight: 800; font-size: 20px; }
+
+    /* Show More Button */
+    .pagination-wrapper { display: flex; justify-content: center; padding-bottom: 60px; }
+    .btn-show-more {
+      padding: 14px 40px;
+      background: white;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-show-more:hover { background: var(--primary-color); color: white; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo" onclick="window.location.href='/'">ELITE SHOP</div>
+  <div class="nav-buttons">
+    <button onclick="requireAuth('/profile')">Profile</button>
+    <button class="btn-add" onclick="requireAuth('/create_product')">Add Product</button>
+  </div>
+</div>
+
+<div class="products-container" id="products-container">
+  </div>
+
+<div class="pagination-wrapper">
+  <button id="show-more-btn" class="btn-show-more" onclick="fetchProducts()">Show More</button>
+</div>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000";
+  const PLACEHOLDER_IMG = "https://placehold.co/600x600/e1e7ef/475569?text=No+Image+Available";
+
+  let skip = 0;
+  const limit = 8;
+
+  /**
+   * AUTH GUARD
+   * Checks if user is logged in before allowing access to private pages.
+   */
+  function requireAuth(targetUrl) {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      alert("Unauthorized! Please login to access this page.");
+      window.location.href = "/login"; // Change to your login route
+      return;
+    }
+    window.location.href = targetUrl;
+  }
+
+  /**
+   * IMAGE HANDLERS
+   */
+  function handleImageError(img) {
+    img.onerror = null;
+    img.src = PLACEHOLDER_IMG;
+  }
+
+  function buildImageUrl(path) {
+    if (!path) return PLACEHOLDER_IMG;
+    if (path.startsWith("http")) return path;
+    return API_URL + (path.startsWith("/") ? "" : "/") + path;
+  }
+
+  /**
+   *  NAVIGATION TO PRODUCT PAGE
+   * Opens the product details in a NEW window/tab.
+   */
+  function goToProductDetails(productId) {
+    // We pass the ID in the URL so the next page can fetch that specific product's data
+    const detailUrl = `/product-details?id=${productId}`;
+    window.open(detailUrl, '_blank'); // Opens in a new tab
+  }
+
+  /**
+   *.DATA FETCHING
+   */
+  async function fetchProducts() {
+    const container = document.getElementById("products-container");
+    const showMoreBtn = document.getElementById("show-more-btn");
+
+    try {
+      const response = await fetch(`${API_URL}/get-products?skip=${skip}&limit=${limit}`);
+      const data = await response.json();
+
+      if (!data.products || data.products.length === 0) {
+        if (skip === 0) container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px;">No products found. Check back later!</div>`;
+        showMoreBtn.classList.add("hidden");
+        return;
+      }
+
+      data.products.forEach(product => {
+        const rawPath = product.main_url || (product.images?.[0]?.image_url) || "";
+        const imgSrc = buildImageUrl(rawPath);
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+
+        card.onclick = () => goToProductDetails(product.id);
+
+        card.innerHTML = `
+          <div class="image-wrapper">
+            <img src="${imgSrc}" alt="" onerror="handleImageError(this)">
+            <div class="view-overlay">View Details</div>
+          </div>
+          <div class="info">
+            <h3>${product.title}</h3>
+            <div class="price">$${product.price.toLocaleString()}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      skip += limit;
+      if (data.products.length < limit) {
+        showMoreBtn.classList.add("hidden");
+      }
+
+    } catch (e) {
+      console.error("Fetch Error:", e);
+      showMoreBtn.innerText = "Error loading. Click to retry.";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", fetchProducts);
+</script>
+
+</body>
+</html>

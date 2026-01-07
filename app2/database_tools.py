@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, String, Integer, Float, Boolean, DateTime, Text
 from sqlalchemy import ForeignKey, Numeric, func
 from sqlalchemy.orm import sessionmaker, DeclarativeBase,  Session
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import relationship, Mapped, mapped_column, selectinload
 from typing import List, Optional
 import os
 from typing import List
@@ -77,19 +78,30 @@ def create_user(userdata: User):
         session.refresh(userdata)
         print("User created successfully")
         return userdata.id
-    except Exception as e:
+    except IntegrityError as e:
         session.rollback()
-        print("""
-        fes
-        fes
-        fes
-        """)
-        print(e)
+        print(f"User already exists info >>>{e}")
         return False
-
     finally:
         session.close()
         print("Session closed")
+
+
+def check_logining_user(userdata: User):
+    try:
+
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        user = session.query(User).filter(User.username == userdata.username, User.password == userdata.password).first()
+
+        if user:
+            return user.id
+        else:
+            return False
+
+    finally:
+        session.close()
+
 
 
 def get_user_id(username):
@@ -132,12 +144,20 @@ def get_random_products():
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
-        products = session.querry(Product).order_by(func.random()).limit(10).all()
+        products = (session.query(Product).options(selectinload(Product.images)).order_by(func.random()).limit(12).all())
         return products
 
     finally:
         session.close()
 
+
+def get_product_by_id(product_id: int):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return (session.query(Product).options(selectinload(Product.images)).filter(Product.id == product_id).first())
+    finally:
+        session.close()
 
 """
 producty uni 

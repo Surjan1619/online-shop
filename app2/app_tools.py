@@ -9,15 +9,12 @@ from fastapi import Depends, Body, HTTPException
 
 import uuid
 
-
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-
-
 load_dotenv()
 JWT_SECRET = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITH")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES"))
 
 class UserPyd(BaseModel):
@@ -56,6 +53,7 @@ def create_access_token(data: dict):
         expire = datetime.utcnow() + timedelta(minutes=JWT_ACCESS_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
         return encoded_jwt
     except Exception as e:
         print(f"Something went wrong: {e}")

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Product</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 30px 25px;
+      border-radius: 10px;
+      width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    h2 {
+      margin: 0 0 15px 0;
+      font-weight: 500;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    input[type="text"], input[type="number"], input[type="file"], button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    input:focus {
+      outline: 1px solid #888;
+    }
+
+    button {
+      border: none;
+      background-color: #222;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background-color: #444;
+    }
+
+    .message {
+      font-size: 13px;
+      color: red;
+      text-align: center;
+    }
+
+    #extra-images-container input {
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Create Product</h2>
+
+  <input type="text" id="title" placeholder="Product Title" required>
+  <input type="number" id="price" placeholder="Price" step="0.01" required>
+
+  <label>Main Image:</label>
+  <input type="file" id="main_image" name="main_image" accept="image/*" required>
+
+  <div id="extra-images-container"></div>
+  <button type="button" id="add-image-btn">Add More Images</button>
+
+  <button onclick="createProduct()">Add Product</button>
+
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+  function getToken() {
+    return localStorage.getItem("access_token");
+  }
+
+  document.getElementById("add-image-btn").addEventListener("click", () => {
+    const container = document.getElementById("extra-images-container");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.name = "images";
+    input.accept = "image/*";
+    container.appendChild(input);
+  });
+
+  async function createProduct() {
+    const title = document.getElementById("title").value.trim();
+    const price = document.getElementById("price").value.trim();
+    const mainImageInput = document.getElementById("main_image");
+    const mainImage = mainImageInput.files[0];
+    const messageDiv = document.getElementById("message");
+
+    messageDiv.textContent = "";
+
+    const token = getToken();
+    if (!token) {
+      alert("You must be logged in to add a product.");
+      return;
+    }
+
+    if (!title || !price || !mainImage) {
+      messageDiv.textContent = "Please fill title, price and select main image.";
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("price", price);
+      formData.append("main_image", mainImage);
+
+      const extraImages = document.querySelectorAll('#extra-images-container input[name="images"]');
+      extraImages.forEach(input => {
+        if (input.files.length > 0) {
+          formData.append("images", input.files[0]);
+        }
+      });
+
+      const response = await fetch("http://127.0.0.1:8000/create-product", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token
+        },
+        body: formData
+      });
+
+      let data = {};
+      try { data = await response.json(); } catch(e){}
+
+      if (response.ok) {
+        messageDiv.style.color = "green";
+        messageDiv.textContent = "Product added successfully!";
+        document.getElementById("title").value = "";
+        document.getElementById("price").value = "";
+        mainImageInput.value = "";
+        document.getElementById("extra-images-container").innerHTML = "";
+      } else {
+        messageDiv.style.color = "red";
+        messageDiv.textContent = data.detail || "Error adding product.";
+      }
+
+    } catch (err) {
+      console.error(err);
+      messageDiv.style.color = "red";
+      messageDiv.textContent = "Server error.";
+    }
+  }
+</script>
+
+</body>
+</html>
