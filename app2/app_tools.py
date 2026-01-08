@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from pathlib import Path
 import jwt
-from jose import jwt
+from jose import jwt, JWTError
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -33,9 +33,9 @@ def token_decode(token,key=None):
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Expired token")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    user = payload.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token eeee")
+    user = int(payload.get("sub"))
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token, no user")
     if key == "get_user":
@@ -49,6 +49,7 @@ def token_decode(token,key=None):
 "func calling example:  create_access_token({'sub': 'user_username'})  "
 def create_access_token(data: dict):
     try:
+        data["sub"] = str(data["sub"])
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(minutes=JWT_ACCESS_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})

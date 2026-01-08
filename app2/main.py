@@ -27,7 +27,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 origins = [
-    "http://localhost:3000",  # адрес фронтенда
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost",
     "http://127.0.0.1",
@@ -35,10 +35,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # разрешённые источники
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],          # GET, POST, OPTIONS и т.д.
-    allow_headers=["*"],          # Content-Type, Authorization и т.д.
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 @app.get("/")
 async def join_page():
@@ -62,6 +62,7 @@ async def create_product_page():
 
 @app.get("/product-details")
 async def product_details_page():
+    print("here product_details_page")
     return FileResponse(STATIC_DIR / "product_details_page.html")
 
 @app.post("/registrate-user")
@@ -96,13 +97,16 @@ async def login(user_data: UserPyd):
 @app.post("/create-product")
 async def get_product_data(
         title: str = Form(...),
+        description: str = Form(...),
         price: float = Form(...),
         main_image: UploadFile = File(...),
         images : Optional[List[UploadFile]] = File(None),
         user = Depends(oauth2_scheme),
+
 ):
-    print(main_image)
-    print(img.filename for img in images)
+
+    user = token_decode(user, key="get_user")
+
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(MEDIA_FOLDER, exist_ok=True)
@@ -116,8 +120,10 @@ async def get_product_data(
     #getting user id and creating SQL alchemy model of the product to add itinto database
     user_id = user
 
+
     product = Product(
         title=title,
+        description=description,
         price=price,
         owner_id=user_id,
     )
@@ -147,8 +153,11 @@ async def get_products_():
 }
 
 @app.get("/get-product/{product_id}")
-async def get_product_by_id(product_id: int):
-    print("ohayo", product_id)
-    return  {"product" : get_product_by_id(product_id)}
+async def get_product_id(product_id: int):
+    product = get_product_by_id(product_id)
+    print(product.title)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product noooot found")
+    return  {"product" : product}
 
 

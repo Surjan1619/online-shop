@@ -38,22 +38,17 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(50), nullable=False)
+    description: Mapped[str] = mapped_column(String(1500), nullable=True)
     price: Mapped[float] = mapped_column(Numeric(10, 2))
-
     owner_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE")
-    )
+        ForeignKey("users.id", ondelete="CASCADE"))
 
     main_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-
     owner: Mapped["User"] = relationship(back_populates="products")
-
     images: Mapped[List["Image"]] = relationship(
         back_populates="product",
         cascade="all, delete-orphan"
     )
-
-
 class Image(Base):
     __tablename__ = "images"
 
@@ -158,6 +153,10 @@ def get_product_by_id(product_id: int):
         return (session.query(Product).options(selectinload(Product.images)).filter(Product.id == product_id).first())
     finally:
         session.close()
+
+
+
+
 
 """
 producty uni 

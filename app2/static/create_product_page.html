@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Product</title>
+  <title>Создать товар | Elite Shop</title>
   <style>
+    :root {
+      --primary-color: #2563eb;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9f9f9;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -16,88 +26,148 @@
     }
 
     .container {
-      background-color: #fff;
-      padding: 30px 25px;
-      border-radius: 10px;
-      width: 360px;
+      background-color: var(--card-bg);
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 20px;
     }
 
     h2 {
-      margin: 0 0 15px 0;
-      font-weight: 500;
-      font-size: 20px;
-      text-align: center;
-    }
-
-    input[type="text"], input[type="number"], input[type="file"], button {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
-
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
       margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-
-    input:focus {
-      outline: 1px solid #888;
+      font-weight: 800;
+      font-size: 24px;
+      text-align: center;
+      color: var(--text-main);
     }
 
-    button {
-      border: none;
-      background-color: #222;
-      color: #fff;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      font-size: 15px;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    input[type="file"] {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px dashed var(--primary-color);
+      padding: 10px;
       cursor: pointer;
-      font-weight: 500;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background-color: #444;
+    .btn-secondary:hover {
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
     }
 
     .message {
-      font-size: 13px;
-      color: red;
+      font-size: 14px;
       text-align: center;
+      min-height: 20px;
     }
 
-    #extra-images-container input {
-      margin-top: 5px;
+    #extra-images-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Create Product</h2>
+  <h2>Добавить товар</h2>
 
-  <input type="text" id="title" placeholder="Product Title" required>
-  <input type="number" id="price" placeholder="Price" step="0.01" required>
+  <div class="form-group">
+    <label>Название товара</label>
+    <input type="text" id="title" placeholder="Напр: iPhone 15 Pro" required>
+  </div>
 
-  <label>Main Image:</label>
-  <input type="file" id="main_image" name="main_image" accept="image/*" required>
+  <div class="form-group">
+    <label>Цена ($)</label>
+    <input type="number" id="price" placeholder="999.99" step="0.01" required>
+  </div>
+
+  <div class="form-group">
+    <label>Описание</label>
+    <textarea id="description" placeholder="Опишите ваш товар подробно..." required></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Главное изображение</label>
+    <input type="file" id="main_image" accept="image/*" required>
+  </div>
 
   <div id="extra-images-container"></div>
-  <button type="button" id="add-image-btn">Add More Images</button>
+  <button type="button" id="add-image-btn" class="btn-secondary">+ Добавить еще фото</button>
 
-  <button onclick="createProduct()">Add Product</button>
+  <button class="btn-primary" onclick="createProduct()">Опубликовать товар</button>
 
   <div class="message" id="message"></div>
 </div>
 
 <script>
+  const API_URL = "http://127.0.0.1:8000";
+
   function getToken() {
     return localStorage.getItem("access_token");
   }
@@ -108,12 +178,14 @@
     input.type = "file";
     input.name = "images";
     input.accept = "image/*";
+    input.style.marginTop = "5px";
     container.appendChild(input);
   });
 
   async function createProduct() {
     const title = document.getElementById("title").value.trim();
     const price = document.getElementById("price").value.trim();
+    const description = document.getElementById("description").value.trim();
     const mainImageInput = document.getElementById("main_image");
     const mainImage = mainImageInput.files[0];
     const messageDiv = document.getElementById("message");
@@ -122,12 +194,13 @@
 
     const token = getToken();
     if (!token) {
-      alert("You must be logged in to add a product.");
+      alert("Ошибка: Вы не авторизованы!");
       return;
     }
 
-    if (!title || !price || !mainImage) {
-      messageDiv.textContent = "Please fill title, price and select main image.";
+    if (!title || !price || !description || !mainImage) {
+      messageDiv.style.color = "red";
+      messageDiv.textContent = "Заполните все обязательные поля!";
       return;
     }
 
@@ -135,6 +208,7 @@
       const formData = new FormData();
       formData.append("title", title);
       formData.append("price", price);
+      formData.append("description", description); // Добавили описание
       formData.append("main_image", mainImage);
 
       const extraImages = document.querySelectorAll('#extra-images-container input[name="images"]');
@@ -144,7 +218,7 @@
         }
       });
 
-      const response = await fetch("http://127.0.0.1:8000/create-product", {
+      const response = await fetch(`${API_URL}/create-product`, {
         method: "POST",
         headers: {
           "Authorization": "Bearer " + token
@@ -152,25 +226,27 @@
         body: formData
       });
 
-      let data = {};
-      try { data = await response.json(); } catch(e){}
+      const data = await response.json();
 
       if (response.ok) {
-        messageDiv.style.color = "green";
-        messageDiv.textContent = "Product added successfully!";
+        messageDiv.style.color = "#10b981";
+        messageDiv.textContent = "Товар успешно добавлен!";
+
+        // Очистка формы
         document.getElementById("title").value = "";
         document.getElementById("price").value = "";
+        document.getElementById("description").value = "";
         mainImageInput.value = "";
         document.getElementById("extra-images-container").innerHTML = "";
       } else {
         messageDiv.style.color = "red";
-        messageDiv.textContent = data.detail || "Error adding product.";
+        messageDiv.textContent = data.detail || "Ошибка при добавлении.";
       }
 
     } catch (err) {
       console.error(err);
       messageDiv.style.color = "red";
-      messageDiv.textContent = "Server error.";
+      messageDiv.textContent = "Ошибка сервера. Проверьте соединение.";
     }
   }
 </script>
