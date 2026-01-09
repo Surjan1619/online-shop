@@ -1,0 +1,47 @@
+
+ 
+
+amen knopka vory vor post zaprosa stuguma nayev klienti tokeny
+ete token chka kam tokeni jamkety lracela namaka cuyc tali "sign in for  interactio
+
+EJERI HETAKANUTYUN
+	LOGIN PAGE
+	sayt mtneluc klientic harcnum enq "enter as a guest" kamel "log in" "sign in"	
+
+	MAIN PAGE
+	
+	erevum en hasaneli apranqnery u amenaverevum ogatiroj "personal page"-y
+		PERSONAL PAGE
+		chgrancvac ogtatirojy het e uxarkum login page
+		hnaravorutyun poxel password
+		apranqner avelacnel/jnjel
+	apranqnery interaktiv en
+	APRANQI PAGE	
+	hnaravor e tertel nkarnery u liarjeq kardal apisanin
+	  
+from fastapi import FastAPI, UploadFile, File, Form
+import shutil
+import os
+
+app = FastAPI()
+
+@app.post("/products")
+async def create_product(
+    title: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    image: UploadFile = File(...)
+):
+    os.makedirs("media/images", exist_ok=True)
+
+    file_path = f"media/images/{image.filename}"
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    return {
+        "title": title,
+        "description": description,
+        "price": price,
+        "image_url": f"/media/images/{image.filename}"
+    }
