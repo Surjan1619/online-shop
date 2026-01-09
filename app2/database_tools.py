@@ -110,6 +110,28 @@ def get_user_id(username):
     finally:
         session.close()
 
+def get_product_by_id(product_id: int):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return (session.query(Product).options(selectinload(Product.images)).filter(Product.id == product_id).first())
+    finally:
+        session.close()
+
+def get_user(data, key=None):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        if key == "by_id":
+            user =  session.query(User).filter(User.id == data).first()
+            return user.username
+        if key == "by_username":
+            user = session.query(User).filter(User.username == data).first()
+            return  user.id
+        if not key or not data:
+            print("incorrect function using" * 10)
+    finally:
+        session.close()
 
 def create_product(product : Product):
     try:
@@ -146,17 +168,31 @@ def get_random_products():
         session.close()
 
 
-def get_product_by_id(product_id: int):
+
+def get_user_all_data(user_id):
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
-        return (session.query(Product).options(selectinload(Product.images)).filter(Product.id == product_id).first())
+        user = (session.query(User).options(
+            selectinload(User.products)
+            .selectinload(Product.images))
+                .filter(User.id == user_id).first())
+        if not user:
+            return None
+        return user
+    except Exception as e:
+        print(e, "ошииииибкааааааа")
+        session.rollback()
     finally:
         session.close()
 
-
-
-
+# def test_func():
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+#     user = session.query(User).filter(User.id == 1).first()
+#     print(user)
+#     session.close()
+# test_func()
 
 """
 producty uni 

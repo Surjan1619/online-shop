@@ -1,4 +1,5 @@
 import shutil
+from itertools import product
 
 from fastapi import FastAPI, UploadFile, Form, Depends, File
 from fastapi.staticfiles import StaticFiles
@@ -11,9 +12,9 @@ import uuid
 from pathlib import Path
 from starlette.responses import FileResponse
 
-from app_tools import UserPyd, create_access_token, get_uniq_filename, ProductPyd, token_decode
+from app_tools import UserPyd, create_access_token, get_uniq_filename, ProductPyd, ImagePyd, token_decode, get_seller_products
 from database_tools import User, Product, Image,  create_user, create_product, create_image, get_random_products
-from database_tools import check_logining_user, get_product_by_id
+from database_tools import check_logining_user, get_product_by_id, get_user_all_data, get_user
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,7 +23,7 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 MEDIA_FOLDER = "media/images"
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
 
@@ -65,6 +66,10 @@ async def product_details_page():
     print("here product_details_page")
     return FileResponse(STATIC_DIR / "product_details_page.html")
 
+@app.get("/go-to-profile")
+async def go_to_profile_page():
+    return FileResponse(STATIC_DIR / "profile_page.html")
+
 @app.post("/registrate-user")
 async def create_us(user: UserPyd):
     #creating alchmy model of the user
@@ -104,9 +109,7 @@ async def get_product_data(
         user = Depends(oauth2_scheme),
 
 ):
-
     user = token_decode(user, key="get_user")
-
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(MEDIA_FOLDER, exist_ok=True)
@@ -119,28 +122,22 @@ async def get_product_data(
         shutil.copyfileobj(main_image.file, buffer)
     #getting user id and creating SQL alchemy model of the product to add itinto database
     user_id = user
-
-
     product = Product(
         title=title,
         description=description,
         price=price,
         owner_id=user_id,
+        main_url=file_path
     )
     # adding prodict into DB and getting his ID
     product = create_product(product)
-
     if images:
         for image in images:
             filename = get_uniq_filename(image.filename)
             file_path = os.path.join(MEDIA_FOLDER, filename)
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-
-
-
             create_image(Image(product_id=product, image_url=file_path))
-
     return {"status": "ok"}
 
 
@@ -155,9 +152,34 @@ async def get_products_():
 @app.get("/get-product/{product_id}")
 async def get_product_id(product_id: int):
     product = get_product_by_id(product_id)
-    print(product.title)
     if not product:
-        raise HTTPException(status_code=404, detail="Product noooot found")
-    return  {"product" : product}
+        raise HTTPException(status_code=404, detail="Product not found")
+    return  {"status": "ok",
+        "product" : product}
+
+@app.get("/profile/{seller_id}")
+async def seller_profile(seller_id : int):
+    products = get_seller_products(seller_id)
+    return {"status" : "ok",
+            "seller" : get_user(seller_id, key="by_id"),
+            "products" : products,}
+
+@app.get("/profile")
+async def user_profile(token: str = Depends(oauth2_scheme)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    else:
+        user_id = token_decode(token, key="get_user")
+        products = get_seller_products(user_id)
+        print("userd dunction  user_profile(", get_user(user_id, key="by_id"))
+        return {"status": "ok",
+                "username": get_user(user_id, key="by_id"),
+                "products": products
+                }
 
 
+    # title: str
+    # description: str
+    # price: float
+    # owner_id: int
+    # main_url: str
