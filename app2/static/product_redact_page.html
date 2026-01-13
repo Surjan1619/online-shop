@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Редактировать товар | Elite Shop</title>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  h2 { margin: 0 0 10px 0; text-align: center; }
+  input, textarea {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  textarea { resize: vertical; min-height: 100px; }
+
+  img { width: 100%; border-radius: 12px; object-fit: cover; }
+
+  button {
+    padding: 12px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  button:hover { background-color: #1d4ed8; }
+
+  .delete-btn {
+    background-color: #ef4444;
+  }
+  .delete-btn:hover { background-color: #dc2626; }
+
+  .message { text-align: center; min-height: 20px; margin-top: 10px; font-size: 14px; color: green; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Редактировать товар</h2>
+
+  <img id="product-image" src="https://placehold.co/600x400?text=Loading..." alt="Product Image">
+
+  <input type="text" id="title" placeholder="Название товара">
+  <textarea id="description" placeholder="Описание товара"></textarea>
+  <input type="number" id="price" placeholder="Цена ($)" step="0.01">
+
+  <button onclick="updateProduct()">Сохранить изменения</button>
+  <button class="delete-btn" onclick="deleteProduct()">Удалить товар</button>
+
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+const API_URL = "http://127.0.0.1:8000";
+// В этой переменной хранится полный объект товара со всеми техническими полями
+let currentProductFullData = null;
+
+function getToken() {
+  return localStorage.getItem("access_token");
+}
+
+function getProductId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
+
+// 1. Загрузка данных товара при открытии страницы
+async function loadProduct() {
+  const productId = getProductId();
+  if (!productId) {
+    document.getElementById("message").textContent = "ID товара не найден в URL";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/get-product/${productId}`);
+    if (!res.ok) throw new Error("Ошибка при загрузке товара");
+
+    const data = await res.json();
+    // Сохраняем ВЕСЬ объект product (со всеми id, owner_id, images, main_url)
+    currentProductFullData = data.product;
+
+    // Заполняем поля формы данными из БД
+    document.getElementById("title").value = currentProductFullData.title || "";
+    document.getElementById("description").value = currentProductFullData.description || "";
+    document.getElementById("price").value = currentProductFullData.price || "";
+
+    // Настройка отображения картинки
+    const imgUrl = currentProductFullData.main_url?.startsWith('http')
+      ? currentProductFullData.main_url
+      : `${API_URL}/${currentProductFullData.main_url?.replace(/^\/+/,'')}`;
+    document.getElementById("product-image").src = imgUrl || "https://placehold.co/600x400?text=No+Image";
+
+    console.log("Товар успешно загружен во временную память:", currentProductFullData);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("message").textContent = "Ошибка при загрузке данных товара.";
+    document.getElementById("message").style.color = "red";
+  }
+}
+
+// 2. Сохранение измененных данных
+async function updateProduct() {
+  const messageDiv = document.getElementById("message");
+
+  if (!currentProductFullData) {
+    messageDiv.textContent = "Ошибка: данные товара еще не загружены.";
+    return;
+  }
+
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const price = parseFloat(document.getElementById("price").value);
+
+  if (!title || !description || isNaN(price)) {
+    messageDiv.style.color = "red";
+    messageDiv.textContent = "Заполните все поля корректно!";
+    return;
+  }
+
+  const token = getToken();
+  if (!token) {
+    alert("Ошибка: Вы не авторизованы!");
+    return;
+  }
+
+  // СОЗДАЕМ PAYLOAD: копируем старые данные и накладываем новые
+  const payload = {
+    ...currentProductFullData,      // Берем id, owner_id, main_url и т.д.
+    title: title,
+    description: description,
+    price: price,
+    // Если images нет или null, передаем пустой массив [], чтобы Pydantic не ругался
+    images: currentProductFullData.images || []
+  };
+
+  console.log("Отправка JSON на бэкенд:", payload);
+
+  try {
+    const res = await fetch(`${API_URL}/redact-product`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const resultData = await res.json();
+
+    if (res.ok) {
+      messageDiv.style.color = "green";
+      messageDiv.textContent = "Товар успешно обновлён! Возвращаемся в профиль...";
+
+      // Редирект в личный кабинет через 1 секунду
+      setTimeout(() => {
+        window.location.href = "/profile";
+      }, 1000);
+
+    } else {
+      messageDiv.style.color = "red";
+      // Выводим конкретную ошибку от FastAPI/Pydantic, если она есть
+      messageDiv.textContent = resultData.detail?.[0]?.msg || resultData.detail || "Ошибка при обновлении";
+      console.error("Детали ошибки 422/403:", resultData);
+    }
+  } catch (err) {
+    console.error("Сетевая ошибка:", err);
+    messageDiv.style.color = "red";
+    messageDiv.textContent = "Ошибка связи с сервером.";
+  }
+}
+
+// Заглушка для удаления
+async function deleteProduct() {
+  const productId = getProductId(); // Получаем ID из URL
+  const token = getToken();
+
+  if (!confirm("Вы уверены, что хотите удалить этот товар?")) return;
+
+  try {
+    const res = await fetch(`${API_URL}/delete-product/${productId}`, {
+      method: "DELETE", // Обычно для удаления используется метод DELETE
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if (res.ok) {
+      alert("Товар удален");
+      window.location.href = "/main_page"; // Перенаправляем пользователя
+    } else {
+      const errorData = await res.json();
+      alert("Ошибка при удалении: " + (errorData.detail || "Неизвестная ошибка"));
+    }
+  } catch (err) {
+    console.error("Ошибка сети:", err);
+    alert("Ошибка связи с сервером");
+  }
+}
+
+// Запуск загрузки при открытии страницы
+window.addEventListener("DOMContentLoaded", loadProduct);
+</script>
+
+</body>
+</html>

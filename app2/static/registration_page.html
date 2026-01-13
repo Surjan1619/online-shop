@@ -80,6 +80,52 @@
     .login-link:hover {
       text-decoration: underline;
     }
+    /* --- MOBILE ADAPTATION --- */
+
+@media (max-width: 480px) {
+  body {
+    /* На мобильных лучше выравнивать по верху, чтобы клавиатура не перекрывала поля */
+    align-items: flex-start;
+    padding-top: 40px;
+    background-color: #ffffff; /* Делаем чистый белый фон для мобильного приложения */
+  }
+
+  .register-container {
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none; /* Убираем тени, чтобы экран выглядел чище */
+    padding: 20px;
+    border-radius: 0;
+  }
+
+  h2 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    font-weight: 700;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    /* 16px — критически важный размер для iOS, чтобы избежать авто-зума при вводе */
+    font-size: 16px;
+    padding: 16px;
+    background-color: #f9f9f9;
+    margin: 8px 0;
+  }
+
+  button {
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 20px;
+  }
+
+  .login-link {
+    padding: 15px; /* Увеличиваем область клика для ссылки */
+    font-size: 15px;
+    color: #4a90e2;
+  }
+}
   </style>
 </head>
 <body>

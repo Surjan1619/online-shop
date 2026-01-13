@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import create_engine, String, Integer, Float, Boolean, DateTime, Text
 from sqlalchemy import ForeignKey, Numeric, func
 from sqlalchemy.orm import sessionmaker, DeclarativeBase,  Session
@@ -82,6 +83,7 @@ def create_user(userdata: User):
         print("Session closed")
 
 
+
 def check_logining_user(userdata: User):
     try:
 
@@ -129,7 +131,7 @@ def get_user(data, key=None):
             user = session.query(User).filter(User.username == data).first()
             return  user.id
         if not key or not data:
-            print("incorrect function using" * 10)
+            print("incorrect function using\n " * 10)
     finally:
         session.close()
 
@@ -181,40 +183,47 @@ def get_user_all_data(user_id):
             return None
         return user
     except Exception as e:
-        print(e, "ошииииибкааааааа")
+        print(e)
         session.rollback()
     finally:
         session.close()
+"""this function is redacting everyting about product without images """
+def redact_product(new_product: Product, ):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        old_product = session.get(Product, new_product.id)
+        #readcting all data about product
+        old_product.title = new_product.title
+        old_product.description = new_product.description
+        old_product.price = new_product.price
+        old_product.main_url = new_product.main_url
+        session.commit()
+        session.refresh(old_product)
+        print("product is sucessfully updated")
+        return True
+    except Exception as e:
+        session.rollback()
+        raise e
 
-# def test_func():
-#     Session = sessionmaker(bind=engine)
-#     session = Session()
-#     user = session.query(User).filter(User.id == 1).first()
-#     print(user)
-#     session.close()
-# test_func()
-
-"""
-producty uni 
-7 pnkt
-id
-title
-priceowner_id
-main_url
-
-
-
-
-"""
-
-
+    finally:
+        session.close()
 
 
-
-"""petqa unenanq CRUD API
-qayler
-1sksnq nranic vor stexcenq avelacnelu API
-1.1 skzbic ogtater stexcelu API
-1.2 heto apranc stexcelu
-1.x amenaverjum zbaxvenq nk-neri het
-"""
+def delete_product(product_id: int, user_id):
+    try:
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        product = session.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        if product.owner_id != user_id:
+            raise HTTPException(status_code=403, detail="You are not the owner of this product")
+        session.delete(product)
+        session.commit()
+        return True
+    except Exception as e:
+        print("Someting went wrong while deleting product", e)
+        session.rollback()
+    finally:
+        session.close()

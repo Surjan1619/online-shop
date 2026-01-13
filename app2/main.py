@@ -1,7 +1,7 @@
 import shutil
 from itertools import product
 
-from fastapi import FastAPI, UploadFile, Form, Depends, File
+from fastapi import FastAPI, UploadFile, Form, Depends, File, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
@@ -12,9 +12,27 @@ import uuid
 from pathlib import Path
 from starlette.responses import FileResponse
 
-from app_tools import UserPyd, create_access_token, get_uniq_filename, ProductPyd, ImagePyd, token_decode, get_seller_products
-from database_tools import User, Product, Image,  create_user, create_product, create_image, get_random_products
-from database_tools import check_logining_user, get_product_by_id, get_user_all_data, get_user
+from app_tools import (UserPyd,
+                       create_access_token,
+                       get_uniq_filename,
+                       ProductPyd, ImagePyd,
+                       token_decode,
+                       get_seller_products)
+
+from database_tools import (User,
+                            Product,
+                            Image,
+                            create_user,
+                            create_product,
+                            create_image,
+                            get_random_products)
+
+from database_tools import (check_logining_user,
+                            get_product_by_id,
+                            get_user_all_data,
+                            get_user,
+                            redact_product,
+                            delete_product)
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
@@ -63,9 +81,11 @@ async def create_product_page():
 
 @app.get("/product-details")
 async def product_details_page():
-    print("here product_details_page")
     return FileResponse(STATIC_DIR / "product_details_page.html")
 
+@app.get("/edit-product")
+async def redact_product_page():
+    return FileResponse(STATIC_DIR / "product_redact_page.html")
 @app.get("/go-to-profile")
 async def go_to_profile_page():
     return FileResponse(STATIC_DIR / "profile_page.html")
@@ -154,29 +174,77 @@ async def get_product_id(product_id: int):
     product = get_product_by_id(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    product = ProductPyd(
+        id=product.id,
+        title=product.title,
+        description=product.description,
+        price=product.price,
+        owner_id=product.owner_id,
+        main_url=product.main_url,
+        images=[ImagePyd(product_id=product.id, image_url=img.image_url) for img in product.images if product.images])
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
     return  {"status": "ok",
         "product" : product}
 
 @app.get("/profile/{seller_id}")
-async def seller_profile(seller_id : int):
+async def seller_profile(seller_id : int, token: str = Depends(oauth2_scheme)):
+    role = "user"
     products = get_seller_products(seller_id)
     return {"status" : "ok",
-            "seller" : get_user(seller_id, key="by_id"),
-            "products" : products,}
+            "username" : get_user(seller_id, key="by_id"),
+            "products" : products,
+            "role": role}
 
 @app.get("/profile")
 async def user_profile(token: str = Depends(oauth2_scheme)):
+    role = None
     if not token:
         raise HTTPException(status_code=401, detail="Unauthorized")
     else:
         user_id = token_decode(token, key="get_user")
         products = get_seller_products(user_id)
-        print("userd dunction  user_profile(", get_user(user_id, key="by_id"))
+        if not products:
+            raise HTTPException(status_code=404, detail="Product not found")
+        if products[0].owner_id == user_id:
+            role = "owner"
         return {"status": "ok",
                 "username": get_user(user_id, key="by_id"),
-                "products": products
-                }
+                "products": products,
+                "role" : role}
 
+
+@app.post("/redact-product")
+async def patch_product(product : ProductPyd, token: str = Depends(oauth2_scheme)):
+    user = token_decode(token, key="get_user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if user != product.owner_id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this product")
+    product = Product(
+        id=product.id,
+        title=product.title,
+        description=product.description,
+        price=product.price,
+        owner_id=product.owner_id,
+        main_url=product.main_url,
+    )
+    if redact_product(product):
+        return {"status": "ok",}
+    else:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+
+
+@app.delete("/delete-product/{product_id}")
+async def post_delete(product_id : int, token: str = Depends(oauth2_scheme)):
+    user = token_decode(token, key="get_user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if delete_product(product_id, user):
+        return {"status": "ok",}
+    else:
+        raise HTTPException(status_code=404, detail="Something went wrong")
 
     # title: str
     # description: str

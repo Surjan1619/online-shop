@@ -78,6 +78,50 @@
     .register-link:hover {
       text-decoration: underline;
     }
+
+    /* --- АДАПТИВНЫЕ СТИЛИ (MOBILE READY) --- */
+
+@media (max-width: 480px) {
+  body {
+    /* Чтобы клавиатура не перекрывала всё, на мобильных выравниваем по верхнему краю */
+    align-items: flex-start;
+    padding-top: 50px;
+    background-color: #ffffff; /* На мобильных часто лучше смотрится чистый белый фон */
+  }
+
+  .login-container {
+    /* Контейнер на всю ширину экрана без лишних теней */
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  input {
+    /* Шрифт 16px предотвращает автоматическое приближение (зум) в iOS Safari */
+    font-size: 16px;
+    padding: 15px;
+    background-color: #f9f9f9; /* Слегка выделяем поля на белом фоне */
+  }
+
+  button {
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .register-link {
+    /* Увеличиваем область нажатия для ссылки */
+    padding: 15px;
+    font-size: 15px;
+    color: #4a90e2;
+  }
+}
   </style>
 </head>
 <body>

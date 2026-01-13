@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Elite Shop | My Profile</title>
+  <title>Elite Shop | Collection</title>
   <style>
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
       --bg: #f8fafc;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
       --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
     }
 
     body {
@@ -21,7 +21,7 @@
       color: var(--text-main);
     }
 
-    /* Навигация (как на главной) */
+    /* Навигация */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -34,41 +34,20 @@
       z-index: 1000;
     }
 
-    .logo { font-size: 22px; font-weight: 800; color: var(--primary); cursor: pointer; }
+    .logo { font-size: 22px; font-weight: 800; color: var(--primary); cursor: pointer; text-decoration: none; }
 
     .nav-buttons button {
       padding: 10px 20px;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
       cursor: pointer;
-      margin-left: 10px;
       font-weight: 600;
-      transition: 0.2s ease;
+      transition: 0.2s;
+      margin-left: 10px;
     }
 
-    .btn-add { background: var(--primary) !important; color: white !important; border: none !important; }
-    .btn-add:hover { background: var(--primary-hover) !important; transform: translateY(-1px); }
-
-    /* Хедер профиля */
-    .profile-header {
-      background: white;
-      padding: 50px 8%;
-      border-bottom: 1px solid #e2e8f0;
-      animation: fadeInDown 0.6s ease-out;
-    }
-
-    .profile-header h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
-
-    #owner-label {
-      display: inline-block;
-      margin-top: 12px;
-      background: #ecfdf5;
-      color: #059669;
-      padding: 6px 14px;
-      border-radius: 99px;
-      font-size: 14px;
-      font-weight: 700;
-    }
+    .btn-add { background: var(--primary); color: white; border: none !important; }
+    .btn-add:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
     /* Сетка товаров */
     .products-container {
@@ -80,16 +59,16 @@
       margin: 0 auto;
     }
 
-    /* Карточка товара с анимациями как на главной */
+    /* Карточка товара */
     .product-card {
       background: var(--card-bg);
       border-radius: 16px;
       overflow: hidden;
       border: 1px solid #f1f5f9;
-      cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
       position: relative;
-      animation: fadeInUp 0.5s ease backwards;
+      animation: fadeInUp 0.6s ease backwards;
     }
 
     .product-card:hover {
@@ -97,7 +76,6 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
-    /* Вспомогательный блок для картинки */
     .image-wrapper {
       width: 100%;
       aspect-ratio: 1/1;
@@ -106,18 +84,8 @@
       overflow: hidden;
     }
 
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s ease;
-    }
+    .image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
 
-    .product-card:hover .image-wrapper img {
-      transform: scale(1.1);
-    }
-
-    /* Оверлей при наведении */
     .view-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -129,136 +97,211 @@
       transition: 0.3s;
       color: white;
       font-weight: 700;
+      text-transform: uppercase;
       backdrop-filter: blur(2px);
     }
 
     .product-card:hover .view-overlay { opacity: 1; }
+    .product-card:hover .image-wrapper img { transform: scale(1.1); }
 
     .info { padding: 20px; }
-    .info h3 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
+    .info h3 { margin: 0 0 10px 0; font-size: 18px; font-weight: 600; }
     .price { color: var(--primary); font-weight: 800; font-size: 20px; }
+
+    /* Пагинация */
+    .pagination-wrapper { display: flex; justify-content: center; padding-bottom: 60px; }
+    .btn-show-more {
+      padding: 14px 40px;
+      background: white;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-show-more:hover { background: var(--primary); color: white; }
 
     .hidden { display: none !important; }
 
-    /* Анимации */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* --- АДАПТИВНЫЕ СТИЛИ (MOBILE READY) --- */
+
+@media (max-width: 768px) {
+  /* Уменьшаем боковые отступы в шапке */
+  .top-bar {
+    padding: 12px 15px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  /* Навигация: делаем кнопки компактнее */
+  .nav-buttons button {
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-left: 5px;
+  }
+
+  /* Сетка товаров:
+     2 колонки на средних экранах, 1 колонка на совсем маленьких */
+  .products-container {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Минимум 2 в ряд */
+    gap: 15px;
+    padding: 20px 15px;
+  }
+
+  /* Уменьшаем шрифт в карточках для мобильных */
+  .info {
+    padding: 12px;
+  }
+
+  .info h3 {
+    font-size: 14px;
+    margin-bottom: 5px;
+    /* Ограничиваем название двумя строками, чтобы карточки были одной высоты */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .price {
+    font-size: 16px;
+  }
+
+  /* Отключаем hover-эффекты на тачскринах (чтобы не было "залипаний") */
+  .product-card:hover {
+    transform: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+
+  .view-overlay {
+    display: none; /* На мобилках текст "View Details" только мешает */
+  }
+
+  /* Делаем кнопку "Show More" на всю ширину */
+  .pagination-wrapper {
+    padding: 0 15px 40px;
+  }
+
+  .btn-show-more {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+/* Для самых маленьких экранов (телефоны в портретном режиме) */
+@media (max-width: 480px) {
+  .products-container {
+    grid-template-columns: 1fr 1fr; /* Оставляем 2 колонки, так удобнее скроллить */
+    gap: 10px;
+  }
+}
   </style>
 </head>
 <body>
 
 <div class="top-bar">
   <div class="logo" onclick="window.location.href='/main_page'">ELITE SHOP</div>
-  <div class="nav-buttons" id="nav-buttons">
-    <button onclick="window.location.href='/main_page'">Home</button>
+  <div class="nav-buttons">
+    <button onclick="requireAuth('/go-to-profile')">Profile</button>
+    <button class="btn-add" onclick="requireAuth('/create_product')">Add Product</button>
   </div>
-</div>
-
-<div class="profile-header">
-  <h1 id="seller-name">Loading...</h1>
-  <p id="owner-label" class="hidden">Личный кабинет</p>
 </div>
 
 <div class="products-container" id="products-container"></div>
 
+<div class="pagination-wrapper">
+  <button id="show-more-btn" class="btn-show-more" onclick="fetchProducts()">Show More</button>
+</div>
+
 <script>
   const API_URL = "http://127.0.0.1:8000";
+  const PLACEHOLDER_IMG = "https://placehold.co/600x600/e1e7ef/475569?text=No+Image";
 
-  async function loadProfile() {
+  let skip = 0;
+  const limit = 8;
+
+  function requireAuth(targetUrl) {
     const token = localStorage.getItem("access_token");
-    const container = document.getElementById("products-container");
-    const nameHeader = document.getElementById("seller-name");
-
     if (!token) {
+      alert("Unauthorized! Please login to access this page.");
       window.location.href = "/login";
       return;
     }
+    window.location.href = targetUrl;
+  }
+
+  function handleImageError(img) {
+    img.onerror = null;
+    img.src = PLACEHOLDER_IMG;
+  }
+
+  function buildImageUrl(path) {
+    if (!path) return PLACEHOLDER_IMG;
+    if (path.startsWith("http")) return path;
+    // Заменяем обратные слэши для корректной работы на Windows
+    const cleanPath = path.replace(/\\/g, '/').startsWith("/") ? path.replace(/\\/g, '/').slice(1) : path.replace(/\\/g, '/');
+    return `${API_URL}/${cleanPath}`;
+  }
+
+  function goToProductDetails(productId) {
+    window.open(`/product-details?id=${productId}`, '_blank');
+  }
+
+  async function fetchProducts() {
+    const container = document.getElementById("products-container");
+    const showMoreBtn = document.getElementById("show-more-btn");
 
     try {
-      const res = await fetch(`${API_URL}/profile`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
+      const response = await fetch(`${API_URL}/get-products?skip=${skip}&limit=${limit}`);
+      const data = await response.json();
 
-      if (!res.ok) throw new Error("Could not load profile");
-
-      const data = await res.json();
-
-      // Отображение имени
-      if (data.username && data.username.username) {
-        nameHeader.innerText = data.username.username;
-      } else if (typeof data.username === 'string') {
-        nameHeader.innerText = data.username;
-      } else {
-        nameHeader.innerText = "User Profile";
-      }
-
-      // Кнопки управления (владелец)
-      document.getElementById("owner-label").classList.remove("hidden");
-      if (!document.getElementById("btn-logout")) {
-          const nav = document.getElementById("nav-buttons");
-          nav.innerHTML += `
-            <button class="btn-add" onclick="window.location.href='/create_product'">Add Product</button>
-            <button id="btn-logout" onclick="logout()">Logout</button>
-          `;
-      }
-
-      container.innerHTML = "";
       if (!data.products || data.products.length === 0) {
-        container.innerHTML = "<h3 style='grid-column: 1/-1; text-align: center; color: var(--text-muted);'>No products yet</h3>";
+        if (skip === 0) container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px;">No products found.</div>`;
+        showMoreBtn.classList.add("hidden");
         return;
       }
 
-      data.products.forEach((p, index) => {
+      data.products.forEach((product, index) => {
+        const rawPath = product.main_url || "";
+        const imgSrc = buildImageUrl(rawPath);
+
         const card = document.createElement("div");
         card.className = "product-card";
-        // Задержка анимации для каждой карточки (эффект очереди)
-        card.style.animationDelay = `${index * 0.1}s`;
-
-        card.onclick = () => window.location.href = `/product-details?id=${p.id}`;
-
-        let rawPath = p.main_url || "";
-        let imgUrl = "https://placehold.co/600x600/e1e7ef/475569?text=No+Image";
-
-        if (rawPath) {
-          if (rawPath.startsWith('http')) {
-            imgUrl = rawPath;
-          } else {
-            const cleanPath = rawPath.startsWith('/') ? rawPath.slice(1) : rawPath;
-            imgUrl = `${API_URL}/${cleanPath}`;
-          }
-        }
+        card.style.animationDelay = `${(index % limit) * 0.1}s`;
+        card.onclick = () => goToProductDetails(product.id);
 
         card.innerHTML = `
           <div class="image-wrapper">
-            <img src="${imgUrl}" onerror="this.src='https://placehold.co/600x600/e1e7ef/475569?text=No+Image'">
-            <div class="view-overlay">Manage Product</div>
+            <img src="${imgSrc}" alt="" onerror="handleImageError(this)">
+            <div class="view-overlay">View Details</div>
           </div>
           <div class="info">
-            <h3>${p.title}</h3>
-            <div class="price">$${p.price.toLocaleString()}</div>
+            <h3>${product.title}</h3>
+            <div class="price">$${product.price.toLocaleString()}</div>
           </div>
         `;
         container.appendChild(card);
       });
 
-    } catch (err) {
-      console.error(err);
-      nameHeader.innerText = "Error loading profile";
+      skip += limit;
+      if (data.products.length < limit) {
+        showMoreBtn.classList.add("hidden");
+      }
+
+    } catch (e) {
+      console.error("Fetch Error:", e);
+      showMoreBtn.innerText = "Error loading. Click to retry.";
     }
   }
 
-  function logout() {
-    localStorage.removeItem("access_token");
-    window.location.href = "/login";
-  }
-
-  document.addEventListener("DOMContentLoaded", loadProfile);
+  document.addEventListener("DOMContentLoaded", fetchProducts);
 </script>
 
 </body>

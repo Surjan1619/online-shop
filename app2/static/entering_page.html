@@ -48,6 +48,34 @@
     .register { background-color: #4CAF50; color: white; }
     .login { background-color: #2196F3; color: white; }
     .guest { background-color: #1e1e2d; color: white; }
+    /* --- АДАПТИВНЫЕ СТИЛИ --- */
+
+@media (max-width: 480px) {
+  body {
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .login-container {
+    /* На мобильных разрешаем контейнеру занимать почти всю ширину */
+    width: 100%;
+    max-width: 320px;
+    padding: 30px 20px;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin-bottom: 25px;
+  }
+
+  /* Увеличиваем высоту кнопок, чтобы по ним было легче попасть */
+  button {
+    padding: 14px;
+    font-size: 18px; /* Чуть крупнее шрифт для читаемости */
+    margin: 8px 0;
+  }
+}
   </style>
 </head>
 <body>
