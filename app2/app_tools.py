@@ -15,8 +15,6 @@ from database_tools import get_user_all_data, get_user
 
 
 
-
-
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 

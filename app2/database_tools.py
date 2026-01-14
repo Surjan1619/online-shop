@@ -6,18 +6,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, Mapped, mapped_column, selectinload
 from typing import List, Optional
 import os
-from typing import List
-import uuid
+
+
 
 engine = create_engine('sqlite:///shop_db.db')
 MEDIA_FOLDER = "media/images"
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
-from typing import List, Optional
-import uuid
-
-from sqlalchemy import String, ForeignKey, Numeric
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
     pass
