@@ -6,4 +6,4 @@ PyJWT==2.10.1
 python-dotenv==1.2.1
 python_jose==3.5.0
 SQLAlchemy==2.0.45
-starlette==0.51.0
+
