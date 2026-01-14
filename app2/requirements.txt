@@ -1,0 +1,9 @@
+fastapi==0.128.0
+jose==1.0.0
+pydantic==2.12.5
+PyJWT==2.10.1
+PyJWT==2.10.1
+python-dotenv==1.2.1
+python_jose==3.5.0
+SQLAlchemy==2.0.45
+starlette==0.51.0
