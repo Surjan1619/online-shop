@@ -82,8 +82,8 @@
 </div>
 
 <script>
-const API_URL = "http://127.0.0.1:8000";
-// В этой переменной хранится полный объект товара со всеми техническими полями
+const API_URL = "";
+
 let currentProductFullData = null;
 
 function getToken() {
@@ -95,7 +95,7 @@ function getProductId() {
   return params.get("id");
 }
 
-// 1. Загрузка данных товара при открытии страницы
+
 async function loadProduct() {
   const productId = getProductId();
   if (!productId) {
@@ -108,15 +108,15 @@ async function loadProduct() {
     if (!res.ok) throw new Error("Ошибка при загрузке товара");
 
     const data = await res.json();
-    // Сохраняем ВЕСЬ объект product (со всеми id, owner_id, images, main_url)
+
     currentProductFullData = data.product;
 
-    // Заполняем поля формы данными из БД
+
     document.getElementById("title").value = currentProductFullData.title || "";
     document.getElementById("description").value = currentProductFullData.description || "";
     document.getElementById("price").value = currentProductFullData.price || "";
 
-    // Настройка отображения картинки
+
     const imgUrl = currentProductFullData.main_url?.startsWith('http')
       ? currentProductFullData.main_url
       : `${API_URL}/${currentProductFullData.main_url?.replace(/^\/+/,'')}`;
@@ -131,7 +131,7 @@ async function loadProduct() {
   }
 }
 
-// 2. Сохранение измененных данных
+
 async function updateProduct() {
   const messageDiv = document.getElementById("message");
 
@@ -156,13 +156,13 @@ async function updateProduct() {
     return;
   }
 
-  // СОЗДАЕМ PAYLOAD: копируем старые данные и накладываем новые
+
   const payload = {
-    ...currentProductFullData,      // Берем id, owner_id, main_url и т.д.
+    ...currentProductFullData,
     title: title,
     description: description,
     price: price,
-    // Если images нет или null, передаем пустой массив [], чтобы Pydantic не ругался
+
     images: currentProductFullData.images || []
   };
 
@@ -184,7 +184,7 @@ async function updateProduct() {
       messageDiv.style.color = "green";
       messageDiv.textContent = "Товар успешно обновлён! Возвращаемся в профиль...";
 
-      // Редирект в личный кабинет через 1 секунду
+
       setTimeout(() => {
         window.location.href = "/profile";
       }, 1000);
@@ -202,16 +202,16 @@ async function updateProduct() {
   }
 }
 
-// Заглушка для удаления
+
 async function deleteProduct() {
-  const productId = getProductId(); // Получаем ID из URL
+  const productId = getProductId();
   const token = getToken();
 
   if (!confirm("Вы уверены, что хотите удалить этот товар?")) return;
 
   try {
     const res = await fetch(`${API_URL}/delete-product/${productId}`, {
-      method: "DELETE", // Обычно для удаления используется метод DELETE
+      method: "DELETE",
       headers: {
         "Authorization": "Bearer " + token
       }
@@ -219,7 +219,7 @@ async function deleteProduct() {
 
     if (res.ok) {
       alert("Товар удален");
-      window.location.href = "/main_page"; // Перенаправляем пользователя
+      window.location.href = "/main_page";
     } else {
       const errorData = await res.json();
       alert("Ошибка при удалении: " + (errorData.detail || "Неизвестная ошибка"));
@@ -230,7 +230,7 @@ async function deleteProduct() {
   }
 }
 
-// Запуск загрузки при открытии страницы
+
 window.addEventListener("DOMContentLoaded", loadProduct);
 </script>
 

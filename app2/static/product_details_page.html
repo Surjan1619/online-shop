@@ -48,19 +48,19 @@ body {
     width: 100%;
 }
 
-/* Главный бокс картинки адаптирован под свайп */
+
 .main-img-box {
     background: white;
     border-radius: 20px;
     overflow: hidden;
     width: 100%;
-    aspect-ratio: 1 / 1.2; /* Оптимально для мобилок */
+    aspect-ratio: 1 / 1.2;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     position: relative;
-    touch-action: pan-y; /* Разрешаем вертикальный скролл страницы, но слушаем горизонталь */
+    touch-action: pan-y;
 }
 .main-img-box img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -69,9 +69,9 @@ body {
     gap: 10px;
     overflow-x: auto;
     padding: 5px 0;
-    scrollbar-width: none; /* Скрываем скроллбар в Firefox */
+    scrollbar-width: none;
 }
-.thumb-scroll::-webkit-scrollbar { display: none; } /* Скрываем скроллбар в Chrome/Safari */
+.thumb-scroll::-webkit-scrollbar { display: none; }
 
 .thumb {
     width: 70px;
@@ -129,7 +129,7 @@ body {
 
 .products-list {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки на мобилках */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
 }
 .product-card {
@@ -144,17 +144,17 @@ body {
 
 #loading-details { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 2000; }
 
-/* АДАПТАЦИЯ ПОД МОБИЛЬНЫЕ */
+
 @media (max-width: 850px) {
     .header { padding: 10px 15px; }
     .product-grid { grid-template-columns: 1fr; gap: 25px; }
     .info h1 { font-size: 26px; }
     .price { font-size: 24px; margin: 10px 0; }
-    .actions { flex-direction: row; } /* Кнопки в ряд для iPhone 16 Pro Max (он широкий) */
+    .actions { flex-direction: row; }
 }
 
 @media (max-width: 500px) {
-    .actions { flex-direction: column; } /* На маленьких телефонах кнопки друг под другом */
+    .actions { flex-direction: column; }
     .products-list { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .product-card { padding: 8px; }
 }
@@ -220,14 +220,14 @@ body {
 </div>
 
 <script>
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "";
 const PLACEHOLDER_IMG = "https://placehold.co/600x800?text=Нет+фото";
 let allImages = [];
 let currentIndex = 0;
 let autoPlayInterval;
 let userTouched = false;
 
-// Для свайпов
+
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -258,7 +258,7 @@ async function init() {
         const readMore = document.getElementById("read-more");
         descEl.innerText = product.description || "";
 
-        // Маленький фикс: проверяем высоту после вставки текста
+
         setTimeout(() => {
             if (descEl.scrollHeight > 120) readMore.style.display = "block";
         }, 100);
@@ -316,7 +316,7 @@ function selectImage(index) {
     const thumbs = document.querySelectorAll(".thumb");
     thumbs.forEach((t, i) => t.classList.toggle("active", i === index));
 
-    // Скроллим превьюшки, чтобы активная всегда была видна
+
     if (thumbs[index]) {
         thumbs[index].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
@@ -339,11 +339,11 @@ function setupSwipe() {
 
 function handleGesture() {
     if (allImages.length < 2) return;
-    if (touchStartX - touchEndX > 50) { // Свайп влево -> след. фото
+    if (touchStartX - touchEndX > 50) {
         currentIndex = (currentIndex + 1) % allImages.length;
         selectImage(currentIndex);
     }
-    if (touchEndX - touchStartX > 50) { // Свайп вправо -> пред. фото
+    if (touchEndX - touchStartX > 50) {
         currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
         selectImage(currentIndex);
     }

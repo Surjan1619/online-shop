@@ -130,37 +130,37 @@
       flex-direction: column;
       gap: 10px;
     }
-    /* --- АДАПТИВНЫЕ СТИЛИ (MOBILE READY) --- */
+
 
 @media (max-width: 500px) {
   body {
-    /* На мобильных лучше выравнивать по верху, чтобы клавиатура не перекрывала всё */
+
     align-items: flex-start;
     padding-top: 20px;
   }
 
   .container {
-    /* Убираем фиксированную ширину и скругления снизу, если нужно на весь экран */
+
     max-width: 100%;
     margin: 15px;
     padding: 25px 20px;
     box-sizing: border-box;
-    border-radius: 16px; /* Чуть меньше скругление для узких экранов */
+    border-radius: 16px;
   }
 
   h2 {
     font-size: 20px;
   }
 
-  /* Увеличиваем высоту инпутов для удобства касания */
+
   input[type="text"],
   input[type="number"],
   textarea {
-    font-size: 16px; /* Защита от авто-зума на iPhone при фокусе */
+    font-size: 16px;
     padding: 14px;
   }
 
-  /* Стилизация выбора файлов (делаем ссылки-кнопки крупнее) */
+
   input[type="file"] {
     padding: 10px 0;
   }
@@ -212,7 +212,7 @@
 </div>
 
 <script>
-  const API_URL = "http://127.0.0.1:8000";
+  const API_URL = "";
 
   function getToken() {
     return localStorage.getItem("access_token");
@@ -254,7 +254,7 @@
       const formData = new FormData();
       formData.append("title", title);
       formData.append("price", price);
-      formData.append("description", description); // Добавили описание
+      formData.append("description", description);
       formData.append("main_image", mainImage);
 
       const extraImages = document.querySelectorAll('#extra-images-container input[name="images"]');

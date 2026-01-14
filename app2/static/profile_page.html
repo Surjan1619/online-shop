@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Elite Shop | Profile</title>
   <style>
-    /* ПЕРЕМЕННЫЕ */
+
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
@@ -23,7 +23,7 @@
       line-height: 1.5;
     }
 
-    /* ВЕРХНЯЯ ПАНЕЛЬ */
+
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -77,7 +77,7 @@
       box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
     }
 
-    /* ХЕДЕР ПРОФИЛЯ */
+
     .profile-header {
       background: white;
       padding: 60px 8%;
@@ -106,7 +106,7 @@
       width: fit-content;
     }
 
-    /* СЕТКА ТОВАРОВ */
+
     .products-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -116,7 +116,6 @@
       margin: 0 auto;
     }
 
-    /* КАРТОЧКА ТОВАРА */
     .product-card {
       background: white;
       border-radius: 20px;
@@ -168,7 +167,7 @@
 
     .hidden { display: none !important; }
 
-    /* ПУСТОЕ СОСТОЯНИЕ */
+
     .empty-state {
       grid-column: 1/-1;
       text-align: center;
@@ -176,7 +175,6 @@
       color: var(--text-muted);
     }
 
-    /* АНИМАЦИЯ ЗАГРУЗКИ */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -185,10 +183,10 @@
     .product-card {
       animation: fadeIn 0.5s ease backwards;
     }
-    /* --- АДАПТИВНЫЕ СТИЛИ (MOBILE READY) --- */
+
 
 @media (max-width: 768px) {
-  /* Шапка: уменьшаем отступы и размер лого */
+
   .top-bar {
     padding: 10px 15px;
   }
@@ -197,17 +195,17 @@
     font-size: 16px;
   }
 
-  /* Навигация: кнопки делаем компактнее, чтобы не вылезали за экран */
+
   .nav-buttons button {
     padding: 8px 12px;
     font-size: 12px;
     margin-left: 5px;
   }
 
-  /* Хедер профиля: уменьшаем огромные отступы */
+
   .profile-header {
     padding: 30px 15px;
-    align-items: center; /* Центрируем имя на мобилках */
+    align-items: center;
     text-align: center;
   }
 
@@ -215,14 +213,14 @@
     font-size: 24px;
   }
 
-  /* Сетка товаров: переходим на 2 колонки */
+
   .products-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     padding: 20px 15px;
   }
 
-  /* Карточка товара: оптимизация под тач */
+
   .info {
     padding: 12px;
   }
@@ -236,7 +234,7 @@
     font-size: 16px;
   }
 
-  /* Кнопка "Редактировать": делаем крупнее для пальца */
+
   .product-card .edit-btn {
     padding: 8px 12px !important;
     font-size: 11px !important;
@@ -245,16 +243,16 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 
-  /* Пустое состояние */
+
   .empty-state {
     padding: 40px 20px;
   }
 }
 
-/* Совсем мелкие экраны */
+
 @media (max-width: 380px) {
   .products-container {
-    grid-template-columns: 1fr; /* Одна колонка, если экран очень узкий */
+    grid-template-columns: 1fr;
   }
 }
   </style>
@@ -279,10 +277,10 @@
 <div class="products-container" id="products-container"></div>
 
 <script>
-  const API_URL = "http://127.0.0.1:8000";
+  const API_URL = "";
 
   async function loadProfile() {
-    // 1. Извлекаем ID из URL (например, из /profile?id=5)
+
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
 
@@ -296,7 +294,7 @@
     }
 
     try {
-      // 2. Формируем URL для запроса к API с учетом ID
+
       let fetchUrl = `${API_URL}/profile`;
       if (userId) {
         fetchUrl += `/${userId}`;
@@ -314,7 +312,7 @@
 
       const data = await res.json();
         console.log(data)
-      // Отображение имени пользователя
+
       if (data.username && data.username.username) {
         nameHeader.innerText = data.username.username;
       } else if (typeof data.username === 'string') {
@@ -323,7 +321,7 @@
         nameHeader.innerText = "User Profile";
       }
 
-      // Показываем метку личного кабинета и кнопки управления
+
       document.getElementById("owner-label").classList.remove("hidden");
       if (!document.getElementById("btn-logout")) {
           const nav = document.getElementById("nav-buttons");
@@ -339,13 +337,13 @@
         return;
       }
 
-      // Отрисовка карточек товаров
+
       data.products.forEach((p, index) => {
         const card = document.createElement("div");
         card.className = "product-card";
         card.style.animationDelay = `${index * 0.05}s`;
 
-        // Клик по карточке открывает детали
+
         card.onclick = (e) => {
           if (e.target.classList.contains("edit-btn")) return;
           window.location.href = `/product-details?id=${p.id}`;

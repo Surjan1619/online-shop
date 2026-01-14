@@ -43,22 +43,16 @@ MEDIA_FOLDER = "media/images"
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-
-
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost",
-    "http://127.0.0.1",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 @app.get("/")
 async def join_page():
     return FileResponse(STATIC_DIR / "entering_page.html")

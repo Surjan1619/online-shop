@@ -80,20 +80,20 @@
     .login-link:hover {
       text-decoration: underline;
     }
-    /* --- MOBILE ADAPTATION --- */
+
 
 @media (max-width: 480px) {
   body {
-    /* На мобильных лучше выравнивать по верху, чтобы клавиатура не перекрывала поля */
+
     align-items: flex-start;
     padding-top: 40px;
-    background-color: #ffffff; /* Делаем чистый белый фон для мобильного приложения */
+    background-color: #ffffff;
   }
 
   .register-container {
     width: 100%;
     max-width: 100%;
-    box-shadow: none; /* Убираем тени, чтобы экран выглядел чище */
+    box-shadow: none;
     padding: 20px;
     border-radius: 0;
   }
@@ -106,7 +106,7 @@
 
   input[type="text"],
   input[type="password"] {
-    /* 16px — критически важный размер для iOS, чтобы избежать авто-зума при вводе */
+
     font-size: 16px;
     padding: 16px;
     background-color: #f9f9f9;
@@ -121,7 +121,7 @@
   }
 
   .login-link {
-    padding: 15px; /* Увеличиваем область клика для ссылки */
+    padding: 15px;
     font-size: 15px;
     color: #4a90e2;
   }
@@ -161,7 +161,7 @@
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/registrate-user", {
+      const response = await fetch("/registrate-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
