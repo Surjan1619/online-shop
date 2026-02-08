@@ -58,7 +58,7 @@ class Image(Base):
     product: Mapped["Product"] = relationship(back_populates="images")
 
 
-
+Base.metadata.create_all(bind=engine)
 
 def create_user(userdata: User):
     try:
@@ -78,6 +78,8 @@ def create_user(userdata: User):
         print("Session closed")
 
 
+# created async version  ^^^
+
 
 def check_logining_user(userdata: User):
     try:
@@ -95,6 +97,8 @@ def check_logining_user(userdata: User):
         session.close()
 
 
+# created async version  ^^^
+
 
 def get_user_id(username):
     try:
@@ -107,6 +111,9 @@ def get_user_id(username):
     finally:
         session.close()
 
+
+# created async version  ^^^
+
 def get_product_by_id(product_id: int):
     try:
         Session = sessionmaker(bind=engine)
@@ -115,6 +122,8 @@ def get_product_by_id(product_id: int):
     finally:
         session.close()
 
+
+# created async version  ^^^
 def get_user(data, key=None):
     try:
         Session = sessionmaker(bind=engine)
@@ -130,6 +139,8 @@ def get_user(data, key=None):
     finally:
         session.close()
 
+
+# created async version  ^^^
 def create_product(product : Product):
     try:
         Session = sessionmaker(bind=engine)
@@ -142,6 +153,8 @@ def create_product(product : Product):
     finally:
         session.close()
 
+
+# created async version  ^^^
 def create_image(imagedata: Image):
     try:
         Session = sessionmaker(bind=engine)
@@ -154,18 +167,21 @@ def create_image(imagedata: Image):
     finally:
         session.close()
 
+
+# created async version  ^^^
 def get_random_products():
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
         products = (session.query(Product).options(selectinload(Product.images)).order_by(func.random()).limit(12).all())
         return products
-
     finally:
         session.close()
 
 
+# created async version  ^^^
 
+# out of usage vvv
 def get_user_all_data(user_id):
     try:
         Session = sessionmaker(bind=engine)
@@ -204,6 +220,8 @@ def redact_product(new_product: Product, ):
     finally:
         session.close()
 
+
+# created async version  ^^^
 
 def delete_product(product_id: int, user_id):
     try:

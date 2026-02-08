@@ -280,13 +280,15 @@
   const API_URL = "";
 
   async function loadProfile() {
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('id');
+      // 1. Извлекаем ID из пути: /go-to-profile/5 -> userId = 5
+      const pathParts = window.location.pathname.split('/');
+      const userId = pathParts[pathParts.length - 1];
 
     const token = localStorage.getItem("access_token");
     const container = document.getElementById("products-container");
     const nameHeader = document.getElementById("seller-name");
+      const ownerLabel = document.getElementById("owner-label");
+      const nav = document.getElementById("nav-buttons");
 
     if (!token) {
       window.location.href = "/login";
@@ -294,55 +296,48 @@
     }
 
     try {
-
-      let fetchUrl = `${API_URL}/profile`;
-      if (userId) {
-        fetchUrl += `/${userId}`;
-      }
-
-
-      const res = await fetch(fetchUrl, {
+        // 2. Делаем запрос на эндпоинт /profile/{id}
+        const res = await fetch(`${API_URL}/profile/${userId}`, {
         headers: { "Authorization": "Bearer " + token }
       });
-      console.log("response -->>", res)
-
-
 
       if (!res.ok) throw new Error("Could not load profile");
 
       const data = await res.json();
-        console.log(data)
 
+        // 3. Заполняем имя пользователя
       if (data.username && data.username.username) {
         nameHeader.innerText = data.username.username;
-      } else if (typeof data.username === 'string') {
-        nameHeader.innerText = data.username;
       } else {
-        nameHeader.innerText = "User Profile";
+          nameHeader.innerText = data.username || "User Profile";
       }
 
+        // 4. Логика для владельца (role: "owner")
+        const isOwner = data.role === "owner";
 
-      document.getElementById("owner-label").classList.remove("hidden");
-      if (!document.getElementById("btn-logout")) {
-          const nav = document.getElementById("nav-buttons");
+        if (isOwner) {
+            ownerLabel.classList.remove("hidden");
+            if (!document.getElementById("btn-logout")) {
           nav.innerHTML += `
             <button class="btn-add" onclick="window.location.href='/create_product'">Add Product</button>
             <button id="btn-logout" onclick="logout()">Logout</button>
           `;
+            }
+        } else {
+            ownerLabel.classList.add("hidden");
       }
 
+        // 5. Рендерим товары
       container.innerHTML = "";
       if (!data.products || data.products.length === 0) {
-        container.innerHTML = "<div class='empty-state'><h3>No products yet</h3><p>Your store is waiting for its first item.</p></div>";
+          container.innerHTML = "<div class='empty-state'><h3>No products yet</h3><p>This store is waiting for its first item.</p></div>";
         return;
       }
-
 
       data.products.forEach((p, index) => {
         const card = document.createElement("div");
         card.className = "product-card";
         card.style.animationDelay = `${index * 0.05}s`;
-
 
         card.onclick = (e) => {
           if (e.target.classList.contains("edit-btn")) return;
@@ -353,29 +348,24 @@
         let imgUrl = "https://placehold.co/400";
 
         if (rawPath) {
-          if (rawPath.startsWith('http')) {
-            imgUrl = rawPath;
-          } else {
-            const cleanPath = rawPath.startsWith('/') ? rawPath.slice(1) : rawPath;
-            imgUrl = `${API_URL}/${cleanPath}`;
-          }
+            imgUrl = rawPath.startsWith('http') ? rawPath : `${API_URL}/${rawPath.replace(/^\//, '')}`;
         }
+
+          // Кнопка редактирования только если роль - владелец
+          const editBtnHtml = isOwner ? `
+          <button class="edit-btn" style="
+            position: absolute; top: 8px; right: 8px;
+            background-color: #e5e7eb; border: none;
+            border-radius: 6px; padding: 4px 8px;
+            font-size: 12px; cursor: pointer; color: #374151;
+            z-index: 10;
+          ">Редактировать</button>
+        ` : '';
 
         card.innerHTML = `
           <div style="position: relative;">
             <img src="${imgUrl}" onerror="this.src='https://placehold.co/400'">
-            <button class="edit-btn" style="
-              position: absolute;
-              top: 8px;
-              right: 8px;
-              background-color: #e5e7eb;
-              border: none;
-              border-radius: 6px;
-              padding: 4px 8px;
-              font-size: 12px;
-              cursor: pointer;
-              color: #374151;
-            ">Редактировать</button>
+            ${editBtnHtml}
           </div>
           <div class="info">
             <h3>${p.title}</h3>
@@ -383,10 +373,13 @@
           </div>
         `;
 
-        card.querySelector(".edit-btn").onclick = (e) => {
-          e.stopPropagation();
-          window.location.href = `/edit-product?id=${p.id}`;
-        };
+          // Вешаем событие на кнопку редактирования, если она есть
+          if (isOwner) {
+              card.querySelector(".edit-btn").onclick = (e) => {
+                  e.stopPropagation();
+                  window.location.href = `/edit-product?id=${p.id}`;
+              };
+          }
 
         container.appendChild(card);
       });

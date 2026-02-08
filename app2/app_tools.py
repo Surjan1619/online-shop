@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, Body, HTTPException
 from typing import List, Optional
 import uuid
-from database_tools import get_user_all_data, get_user
+from io_db_tools import get_user_all_data
 
 
 
@@ -90,8 +90,8 @@ def get_uniq_filename(filename : str):
 
 
 #this function reutns all products of the user by username
-def get_seller_products(user_id):
-    user = get_user_all_data(user_id)
+async def get_seller_products(user_id):
+    user = await get_user_all_data(user_id)
     products = []
     try:
         if user.products:

@@ -251,7 +251,7 @@ async function init() {
 
         const sellerBtn = document.getElementById("seller-profile-btn");
         sellerBtn.onclick = () => {
-            location.href = `/go-to-profile?id=${product.owner_id}`;
+            location.href = `/go-to-profile/${product.owner_id}`;
         };
 
         const descEl = document.getElementById("desc");
