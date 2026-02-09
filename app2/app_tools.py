@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 from fastapi import Depends, Body, HTTPException
 from typing import List, Optional
 import uuid
-from io_db_tools import get_user_all_data
+from io_db_tools import get_user_all_data, Image
+from PIL import Image as Img
+from io import BytesIO
 
 
 
@@ -107,3 +109,15 @@ async def get_seller_products(user_id):
     except Exception as e:
             return []
     return products
+
+
+def compress_image(file_bytes):
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too big")
+    else:
+        img = Img.open(BytesIO(file_bytes))
+        img = img.convert("RGB")
+        img.thumbnail((1024, 1024))
+        out = BytesIO()
+        img.save(out, "WEBP", quality=60)
+        return out.getvalue()

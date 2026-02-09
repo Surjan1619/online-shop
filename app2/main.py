@@ -13,7 +13,8 @@ from app_tools import (UserPyd,
                        get_uniq_filename,
                        ProductPyd, ImagePyd,
                        token_decode,
-                       get_seller_products)
+                       get_seller_products,
+                       compress_image)
 from io_db_tools import (User, Product, Image,
                          create_user,
                          check_logining_user,
@@ -151,6 +152,7 @@ async def get_product_data(
     #creating main image
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(main_image.file, buffer)
+
     #getting user id and creating SQL alchemy model of the product to add itinto database
     user_id = user
     product = Product(
@@ -164,10 +166,18 @@ async def get_product_data(
     product = await create_product(product)
     if images:
         for image in images:
+            content = await image.read()
+            compressed_image = compress_image(content)
+            # creating uniq filename
             filename = get_uniq_filename(image.filename)
+            # changing extantion
+            filename = os.path.splitext(filename)[0] + ".webp"
+            #creating file path
             file_path = os.path.join(MEDIA_FOLDER, filename)
+            #saving file
             with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
+                buffer.write(compressed_image)
+
             await create_image(Image(product_id=product, image_url=file_path))
     return {"status": "ok"}
 
@@ -219,9 +229,10 @@ async def user_profile(id: int, token: str = Depends(oauth2_scheme)):
     else:
         user_id = token_decode(token)['sub']
         products = await get_seller_products(id)
-        if id == int(user_id):
+        if id == int(user_id) or await get_user(int(user_id)) == "Admin":
             role = "owner"
             print("owner entered")
+
         return {"status": "ok",
                 "username": await get_user(id),
                 "products": products,
