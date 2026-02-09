@@ -201,7 +201,6 @@ async def patch_product(product : ProductPyd, token: str = Depends(oauth2_scheme
 @app.delete("/delete-product/{product_id}")
 async def post_delete(product_id : int, token: str = Depends(oauth2_scheme)):
     user = token_decode(token, key="get_user")
-    print(product_id, type(product_id))
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     if await delete_product(product_id, user):
@@ -229,7 +228,7 @@ async def user_profile(id: int, token: str = Depends(oauth2_scheme)):
     else:
         user_id = token_decode(token)['sub']
         products = await get_seller_products(id)
-        if id == int(user_id) or await get_user(int(user_id)) == "Admin":
+        if id == int(user_id) or await get_user(user_id) == "Admin":
             role = "owner"
             print("owner entered")
 

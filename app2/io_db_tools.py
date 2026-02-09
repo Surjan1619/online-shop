@@ -142,6 +142,7 @@ async def get_user_all_data(user_id):
 async def get_user(data):
     async with SessionLocal() as session:
         try:
+            data = int(data)
             stmt = select(User).where(User.id == data)
             result = await session.execute(stmt)
             user = result.scalars().first()
@@ -215,7 +216,7 @@ async def delete_product(product_id: int, user_id):
             product = result.scalars().first()
             if not product:
                 raise HTTPException(status_code=404, detail="Product not found")
-            if product.owner_id != user_id:
+            if product.owner_id != user_id or get_user(user_id) != "Admin":
                 raise HTTPException(status_code=403, detail="You are not the owner of this product")
             await session.delete(product)
             await session.commit()
