@@ -183,7 +183,7 @@ async def patch_product(product : ProductPyd, token: str = Depends(oauth2_scheme
         raise HTTPException(status_code=401, detail="Unauthorized")
     if user != product.owner_id:
         raise HTTPException(status_code=403, detail="You are not the owner of this product")
-    if await redact_product(id, product.title, product.description, product.price):
+    if await redact_product(product.id, product.title, product.description, product.price):
         return {"status": "ok",}
     else:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -191,6 +191,7 @@ async def patch_product(product : ProductPyd, token: str = Depends(oauth2_scheme
 @app.delete("/delete-product/{product_id}")
 async def post_delete(product_id : int, token: str = Depends(oauth2_scheme)):
     user = token_decode(token, key="get_user")
+    print(product_id, type(product_id))
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     if await delete_product(product_id, user):
@@ -218,9 +219,9 @@ async def user_profile(id: int, token: str = Depends(oauth2_scheme)):
     else:
         user_id = token_decode(token)['sub']
         products = await get_seller_products(id)
-        print(type(products))
-        if id == user_id:
+        if id == int(user_id):
             role = "owner"
+            print("owner entered")
         return {"status": "ok",
                 "username": await get_user(id),
                 "products": products,

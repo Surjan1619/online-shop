@@ -192,6 +192,7 @@ async def get_random_products():
 async def redact_product(id, title, description, price, ):
     async with SessionLocal() as session:
         try:
+            print(type(id), id, 10 * "\n")
             old_product = await session.get(Product, id)
             # readcting all data about product
             old_product.title = title
@@ -216,8 +217,8 @@ async def delete_product(product_id: int, user_id):
                 raise HTTPException(status_code=404, detail="Product not found")
             if product.owner_id != user_id:
                 raise HTTPException(status_code=403, detail="You are not the owner of this product")
-            session.delete(product)
-            session.commit()
+            await session.delete(product)
+            await session.commit()
             return True
         except DatabaseError:
             await session.rollback()
