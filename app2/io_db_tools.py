@@ -216,7 +216,7 @@ async def delete_product(product_id: int, user_id):
             product = result.scalars().first()
             if not product:
                 raise HTTPException(status_code=404, detail="Product not found")
-            if product.owner_id == user_id or get_user(user_id) == "Admin":
+            if product.owner_id == user_id or await get_user(user_id) == "Admin":
                 await session.delete(product)
                 await session.commit()
                 return True
