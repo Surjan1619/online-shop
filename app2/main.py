@@ -191,10 +191,9 @@ async def patch_product(product : ProductPyd, token: str = Depends(oauth2_scheme
     user = token_decode(token, key="get_user")
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    if user != product.owner_id:
-        raise HTTPException(status_code=403, detail="You are not the owner of this product")
-    if await redact_product(product.id, product.title, product.description, product.price):
-        return {"status": "ok",}
+    if user == product.owner_id or await get_user(user) == "Admin":
+        if await redact_product(product.id, product.title, product.description, product.price):
+            return {"status": "ok", }
     else:
         raise HTTPException(status_code=404, detail="Product not found")
 
