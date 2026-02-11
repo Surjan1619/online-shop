@@ -146,12 +146,14 @@ async def get_product_data(
         raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(MEDIA_FOLDER, exist_ok=True)
     #gitting unique filename
+    content = await main_image.read()
+    compressed_image = compress_image(content)
     unic_filename = get_uniq_filename(main_image.filename)
     #creating main image directory
     file_path = os.path.join(MEDIA_FOLDER, unic_filename)
     #creating main image
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(main_image.file, buffer)
+        buffer.write(compressed_image)
 
     #getting user id and creating SQL alchemy model of the product to add itinto database
     user_id = user

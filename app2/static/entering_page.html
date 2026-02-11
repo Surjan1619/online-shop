@@ -2,107 +2,310 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход в магазин</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ELITE · entrance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+      :root {
+          --bg-gradient-start: #f0f4fe;
+          --bg-gradient-end: #e9eefa;
+          --glass-bg: rgba(255, 255, 255, 0.7);
+          --glass-border: rgba(255, 255, 255, 0.4);
+          --card-bg: rgba(255, 255, 255, 0.8);
+          --primary: #3a56d8;
+          --primary-light: #4361ee;
+          --primary-deep: #2a41b0;
+          --accent: #7b4ee3;
+          --text-heading: #131836;
+          --text-body: #2b3148;
+          --text-muted: #5e657b;
+          --border-light: rgba(0, 0, 0, 0.06);
+          --shadow-sm: 0 15px 30px -12px rgba(0, 0, 0, 0.05);
+          --shadow-hover: 0 24px 44px -16px rgba(26, 47, 105, 0.18);
+          --radius-md: 16px;
+          --radius-lg: 28px;
+          --transition-spring: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
+        font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at 20% 30%, #e2eafc, #d9e2f2 90%);
+        background-attachment: fixed;
+        color: var(--text-body);
+        min-height: 100vh;
       display: flex;
+        flex-direction: column;
+        align-items: center;
       justify-content: center;
+        padding: 24px;
+    }
+
+      .top-bar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+          padding: 12px 8%;
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(18px) saturate(180%);
+          -webkit-backdrop-filter: blur(18px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+          z-index: 100;
+          box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.02);
+      }
+
+      .logo {
+          font-size: 1.5rem;
+          font-weight: 800;
+          letter-spacing: -1px;
+          background: linear-gradient(145deg, var(--primary), var(--accent));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          cursor: pointer;
+          transition: var(--transition-spring);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+      }
+
+      .logo i {
+          font-size: 1.5rem;
+          color: var(--primary);
+          background: none;
     }
 
-    .login-container {
-      background-color: #fff;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      .glass-container {
+          width: 100%;
+          max-width: 480px;
+          margin: 80px auto 40px;
+          background: var(--glass-bg);
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-lg);
+          padding: 44px 40px;
+          box-shadow: var(--shadow-sm);
+          transition: var(--transition-spring);
+          animation: fadeSlideUp 0.6s ease;
       text-align: center;
-      width: 300px;
+      }
+
+      @keyframes fadeSlideUp {
+          0% {
+              opacity: 0;
+              transform: translateY(24px);
+          }
+          100% {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      .glass-container:hover {
+          box-shadow: var(--shadow-hover);
+          background: rgba(255, 255, 255, 0.8);
+          border-color: rgba(255, 255, 255, 0.8);
+      }
+
+      .form-header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 36px;
     }
 
-    h1 {
-      margin-bottom: 30px;
-      font-size: 24px;
-      color: #333;
+      .form-header i {
+          font-size: 2.8rem;
+          color: var(--primary);
+          background: rgba(67, 97, 238, 0.12);
+          padding: 16px;
+          border-radius: 30px;
+          backdrop-filter: blur(4px);
     }
 
-    button {
+      .form-header h2 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--text-heading);
+          margin: 0;
+          letter-spacing: -0.02em;
+      }
+
+      .welcome-text {
+          color: var(--text-muted);
+          font-size: 1rem;
+          margin-bottom: 20px;
+      }
+
+      .btn-group {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
+      }
+
+      .btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 16px 24px;
       border: none;
-      border-radius: 5px;
+          border-radius: 60px;
+          font-size: 1.1rem;
+          font-weight: 700;
       cursor: pointer;
-      transition: 0.2s;
+          transition: var(--transition-spring);
+          background: white;
+          color: var(--text-heading);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+      }
+
+      .btn i {
+          font-size: 1.2rem;
+      }
+
+      .btn-register {
+          background: linear-gradient(145deg, var(--primary), var(--accent));
+          color: white;
+          box-shadow: 0 16px 28px -10px rgba(67, 97, 238, 0.4);
+      }
+
+      .btn-register:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 24px 38px -10px #3a56d8;
+      }
+
+      .btn-login {
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(8px);
+          color: var(--primary-deep);
+          border: 1.5px solid rgba(67, 97, 238, 0.2);
+      }
+
+      .btn-login:hover {
+          background: white;
+          border-color: var(--primary);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px -10px rgba(67, 97, 238, 0.2);
     }
 
-    button:hover {
-      opacity: 0.9;
+      .btn-guest {
+          background: rgba(30, 30, 45, 0.8);
+          backdrop-filter: blur(8px);
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .register { background-color: #4CAF50; color: white; }
-    .login { background-color: #2196F3; color: white; }
-    .guest { background-color: #1e1e2d; color: white; }
+      .btn-guest i {
+          color: #cbd5e1;
+      }
 
+      .btn-guest:hover {
+          background: #1e1e2d;
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.3);
+      }
 
-@media (max-width: 480px) {
-  body {
-    padding: 20px;
-    box-sizing: border-box;
-  }
+      @media (max-width: 600px) {
+          body {
+              padding: 16px;
+              justify-content: flex-start;
+          }
 
-  .login-container {
+          .top-bar {
+              padding: 10px 5%;
+          }
 
-    width: 100%;
-    max-width: 320px;
-    padding: 30px 20px;
-    box-sizing: border-box;
-  }
+          .glass-container {
+              padding: 32px 24px;
+              margin: 90px 0 20px;
+              border-radius: 32px;
+              max-width: 100%;
+          }
 
-  h1 {
-    font-size: 22px;
-    margin-bottom: 25px;
-  }
+          .form-header h2 {
+              font-size: 1.8rem;
+          }
 
+          .form-header i {
+              font-size: 2.4rem;
+              padding: 14px;
+          }
 
-  button {
-    padding: 14px;
-    font-size: 18px;
-    margin: 8px 0;
-  }
-}
+          .btn {
+              padding: 16px 20px;
+              font-size: 1rem;
+          }
+      }
+
+      @media (max-width: 480px) {
+          .glass-container {
+              padding: 28px 20px;
+          }
+
+          .btn {
+              padding: 14px 18px;
+          }
+      }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
-    <h1>Welcome to Shop</h1>
-    <button class="register" onclick="register()">Register</button>
-    <button class="login" onclick="login()">Login</button>
-    <button class="guest" onclick="enterGuest()">Enter as Guest</button>
-  </div>
+<div class="top-bar">
+    <div class="logo" onclick="window.location.href='/main_page'">
+        <i class="fas fa-cube"></i> ELITE
+    </div>
+    <div style="width: 48px;"></div>
+</div>
 
-  <script>
+<div class="glass-container">
+    <div class="form-header">
+        <i class="fas fa-store"></i>
+        <h2>Welcome</h2>
+    </div>
+    <p class="welcome-text">Sign in or continue as guest</p>
+
+    <div class="btn-group">
+        <button class="btn btn-register" onclick="register()">
+            <i class="fas fa-user-plus"></i> Register
+        </button>
+        <button class="btn btn-login" onclick="login()">
+            <i class="fas fa-key"></i> Login
+        </button>
+        <button class="btn btn-guest" onclick="enterGuest()">
+            <i class="fas fa-user-astronaut"></i> Enter as Guest
+        </button>
+    </div>
+</div>
+
+<script>
     function register() {
-
-      window.location.href = "/register";
+        window.location.href = "/register";
     }
 
     function login() {
-
-      window.location.href = "/login";
+        window.location.href = "/login";
     }
 
     function enterGuest() {
-
-      window.location.href = "/main_page";
+        window.location.href = "/main_page";
     }
-  </script>
+</script>
 
 </body>
 </html>
