@@ -4,10 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
+import asyncio
 import os
 from typing import List, Optional
 from pathlib import Path
 from starlette.responses import FileResponse
+from compress import product_worker, product_queue
 from app_tools import (UserPyd,
                        create_access_token,
                        get_uniq_filename,
@@ -44,11 +47,12 @@ app.add_middleware(
 )
 
 
-
+@app.on_event("startup")
+async def startup():
+    asyncio.create_task(product_worker())
 @app.get("/")
 async def join_page():
     return FileResponse(STATIC_DIR / "entering_page.html")
-
 
 @app.get("/register")
 async def register():
@@ -139,49 +143,23 @@ async def get_product_data(
         main_image: UploadFile = File(...),
         images : Optional[List[UploadFile]] = File(None),
         user = Depends(oauth2_scheme),
-
 ):
+    main_image = {"file": await main_image.read(), "filename": main_image.filename}
+    images_lst = []
+    if images:
+        for img in images:
+            images_lst.append({"file": await img.read(), "filename": img.filename})
     user = token_decode(user, key="get_user")
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(MEDIA_FOLDER, exist_ok=True)
-    #gitting unique filename
-    content = await main_image.read()
-    compressed_image = compress_image(content)
-    unic_filename = get_uniq_filename(main_image.filename)
-    #creating main image directory
-    file_path = os.path.join(MEDIA_FOLDER, unic_filename)
-    #creating main image
-    with open(file_path, "wb") as buffer:
-        buffer.write(compressed_image)
-
-    #getting user id and creating SQL alchemy model of the product to add itinto database
-    user_id = user
-    product = Product(
-        title=title,
-        description=description,
-        price=price,
-        owner_id=user_id,
-        main_url=file_path
-    )
-    # adding prodict into DB and getting his ID
-    product = await create_product(product)
-    if images:
-        for image in images:
-            content = await image.read()
-            compressed_image = compress_image(content)
-            # creating uniq filename
-            filename = get_uniq_filename(image.filename)
-            # changing extantion
-            filename = os.path.splitext(filename)[0] + ".webp"
-            #creating file path
-            file_path = os.path.join(MEDIA_FOLDER, filename)
-            #saving file
-            with open(file_path, "wb") as buffer:
-                buffer.write(compressed_image)
-
-            await create_image(Image(product_id=product, image_url=file_path))
-    return {"status": "ok"}
+    await product_queue.put({"title": title,
+                             "description": description,
+                             "price": price,
+                             "main_image": main_image,
+                             "images": images_lst,
+                             "user": user})
+    return {"status": "processing"}
 
 
 @app.get("/edit-product")
@@ -219,6 +197,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.get("/go-to-profile/{id}")
 async def go_to_profile_page():
     return FileResponse(STATIC_DIR / "profile_page.html")
+
+
+@app.get("/go-to-profile/")
+async def redirect_user(token: str = Depends(oauth2_scheme)):
+    user = token_decode(token, key="get_user")
+    return RedirectResponse(url=f"/go-to-profile/{user}", status_code=301)
 
 
 @app.get("/profile/{id}")

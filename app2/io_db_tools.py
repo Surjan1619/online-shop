@@ -91,10 +91,13 @@ async def create_user(userdata: User):
 async def check_logining_user(userdata: User):
     async with SessionLocal() as session:
         try:
-            stmt = select(User).where(User.username == userdata.username)
+            stmt = select(User).where(User.username == userdata.username, User.password == userdata.password)
             result = await session.execute(stmt)
             user = result.scalars().first()
-            return user.id
+            if user:
+                return user.id
+            else:
+                raise HTTPException(status_code=401, detail="Invalid username or password")
         except DatabaseError:
             raise HTTPException(status_code=500, detail="error while checking user")
 
@@ -182,7 +185,7 @@ async def create_image(imagedata: Image):
 async def get_random_products():
     async with SessionLocal() as session:
         try:
-            stmt = select(Product).options(selectinload(Product.images)).order_by(func.random()).limit(12)
+            stmt = select(Product).options(selectinload(Product.images)).order_by(func.random()).limit(8)
             result = await session.execute(stmt)
             products = result.scalars().all()
             return products

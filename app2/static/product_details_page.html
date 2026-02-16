@@ -504,7 +504,9 @@
         <i class="fas fa-cube"></i> ELITE
     </a>
     <div class="nav-links">
-        <a href="/go-to-profile" class="nav-link"><i class="fas fa-user-circle"></i> Профиль</a>
+        <a href="#" onclick="goToProfile()" class="nav-link">
+            <i class="fas fa-user-circle"></i> Профиль
+        </a>
         <a href="/main_page" class="nav-link"><i class="fas fa-store"></i> Каталог</a>
     </div>
 </header>
@@ -624,6 +626,30 @@ async function init() {
     }
 }
 
+async function goToProfile() {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Вы не авторизованы");
+        window.location.href = "/login";
+        return;
+    }
+
+    const response = await fetch("/go-to-profile/", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (response.redirected) {
+        window.location.href = response.url;
+    } else if (response.status === 401) {
+        alert("Сессия истекла");
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+    }
+}
 function setupGallery() {
     const container = document.getElementById("thumb-container");
     const main = document.getElementById("main-img");
