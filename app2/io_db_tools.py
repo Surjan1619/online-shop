@@ -228,3 +228,35 @@ async def delete_product(product_id: int, user_id):
         except DatabaseError:
             await session.rollback()
             raise HTTPException(status_code=500, detail="error while deleting product")
+
+
+async def get_users_list(offset):
+    async with SessionLocal() as session:
+        try:
+            stmt = select(User).order_by(User.id).offset(offset).limit(10)
+            result = await session.execute(stmt)
+            users = result.scalars().all()
+            userlist = []
+            for user in users:
+                userlist.append({"id": user.id, "username": user.username})
+            return userlist
+        except DatabaseError:
+            await session.rollback()
+            raise HTTPException(status_code=500, detail="error while getting users")
+
+
+async def db_delete_user(user_id, deletor):
+    async with SessionLocal() as session:
+        try:
+            stmt = select(User).where(User.id == user_id)
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            if user.username == deletor or deletor == "Admin":
+                await session.delete(user)
+                await session.commit()
+                return True
+            else:
+                raise HTTPException(status_code=404, detail="no permissions")
+        except DatabaseError:
+            await session.rollback()
+            raise HTTPException(status_code=500, detail="error while deleting user")

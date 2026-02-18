@@ -471,27 +471,41 @@
       }
 
         const isOwner = data.role === "owner";
+        const username = data.username?.username || data.username;
+        const isAdmin = username === "Admin";
 
         if (isOwner) {
             ownerLabel.classList.remove("hidden");
-            if (!document.getElementById("btn-add-product")) {
-                const addBtn = document.createElement("a");
-                addBtn.href = "/create_product";
-                addBtn.className = "nav-link btn-primary";
-                addBtn.id = "btn-add-product";
-                addBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Product';
-                navLinks.appendChild(addBtn);
-
-                const logoutBtn = document.createElement("button");
-                logoutBtn.className = "nav-link";
-                logoutBtn.id = "btn-logout";
-                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-                logoutBtn.onclick = () => logout();
-                navLinks.appendChild(logoutBtn);
-            }
         } else {
             ownerLabel.classList.add("hidden");
-      }
+        }
+
+        if (isAdmin && !document.getElementById("btn-admin")) {
+            const adminBtn = document.createElement("a");
+            adminBtn.href = "/go-admin-panel/";
+            adminBtn.className = "nav-link btn-primary";
+            adminBtn.id = "btn-admin";
+            adminBtn.innerHTML = '<i class="fas fa-cog"></i> Admin';
+            navLinks.appendChild(adminBtn);
+        }
+
+        if (isOwner && !document.getElementById("btn-add-product")) {
+            const addBtn = document.createElement("a");
+            addBtn.href = "/create_product";
+            addBtn.className = "nav-link btn-primary";
+            addBtn.id = "btn-add-product";
+            addBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Product';
+            navLinks.appendChild(addBtn);
+        }
+
+        if (!document.getElementById("btn-logout")) {
+            const logoutBtn = document.createElement("button");
+            logoutBtn.className = "nav-link";
+            logoutBtn.id = "btn-logout";
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            logoutBtn.onclick = () => logout();
+            navLinks.appendChild(logoutBtn);
+        }
 
       container.innerHTML = "";
       if (!data.products || data.products.length === 0) {

@@ -27,7 +27,9 @@ from io_db_tools import (User, Product, Image,
                          create_image,
                          get_random_products,
                          redact_product,
-                         delete_product)
+                         delete_product,
+                         get_users_list,
+                         db_delete_user)
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
@@ -57,6 +59,7 @@ async def join_page():
 @app.get("/register")
 async def register():
     return FileResponse(STATIC_DIR / "registration_page.html")
+
 
 @app.post("/registrate-user")
 async def create_us(user: UserPyd):
@@ -221,3 +224,26 @@ async def user_profile(id: int, token: str = Depends(oauth2_scheme)):
                 "username": await get_user(id),
                 "products": products,
                 "role": role}
+
+
+@app.get("/go-admin-panel/")
+async def go_admin_panel():
+    return FileResponse(STATIC_DIR / "admin_panel.html")
+
+
+@app.get("/get-users")
+async def get_us(offset: int = 0, token: str = Depends(oauth2_scheme)):
+    print("ohyoppooooooooooo")
+    if await get_user(token_decode(token, key="get_user")) == "Admin":
+        users = await get_users_list(offset)
+        return {"userlist": users}
+
+
+@app.delete("/delete-user")
+async def del_user(user_id, token: str = Depends(oauth2_scheme)):
+    if await get_user(token_decode(token, key="get_user")) == "Admin":
+        if not token:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        user = await get_user(token_decode(token, key="get_user"))
+        await db_delete_user(int(user_id), user)
+        return {"status": "ok", }
