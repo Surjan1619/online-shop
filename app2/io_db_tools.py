@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -6,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, selectinload
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, Numeric, func
 from typing import Optional, List
-from sqlalchemy import select
+from sqlalchemy import select, desc, asc
 from sqlalchemy.exc import IntegrityError, DatabaseError
 
 """ORM models"""
@@ -27,7 +28,6 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
-
 class Product(Base):
     __tablename__ = "products"
 
@@ -40,13 +40,13 @@ class Product(Base):
 
     main_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     owner: Mapped["User"] = relationship(back_populates="products")
-    images: Mapped[List["Image"]] = relationship(
-        back_populates="product",
-        cascade="all, delete-orphan"
-    )
+    images: Mapped[List["Image"]] = relationship(back_populates="product", cascade="all, delete-orphan")
+    categories: Mapped[List["Category"]] = relationship(secondary="product_categories", back_populates="products")
 
     def __str__(self):
-        print(self.id, self.title, self.description, self.price, self.owner_id, [i.image_url for i in self.images])
+        print(self.id, self.title, self.description, self.price, self.owner_id,
+              [i.image_url for i in self.images],
+              [i.category_id for i in self.categories])
 
 
 class Image(Base):
@@ -60,6 +60,31 @@ class Image(Base):
     image_url: Mapped[str] = mapped_column(String(255), nullable=False)
 
     product: Mapped["Product"] = relationship(back_populates="images")
+
+
+class ProductCategory(Base):
+    __tablename__ = "product_categories"
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    products: Mapped[List["Product"]] = relationship(
+        secondary="product_categories",
+        back_populates="categories"
+    )
+
 
 
 """DB connection and setting"""
@@ -102,22 +127,12 @@ async def check_logining_user(userdata: User):
             raise HTTPException(status_code=500, detail="error while checking user")
 
 
-# async def get_user_id(username):
-#     async with SessionLocal() as session:
-#         try:
-#             stmt = select(User).where(User.username == username)
-#             result = await session.execute(stmt)
-#             user = result.scalars().first()
-#             if not user:
-#                 return None
-#             return user.id
-#         except DatabaseError:
-#             raise HTTPException(status_code=500, detail="error while getting user id")
 
 async def get_product_by_id(product_id: int):
-    async with SessionLocal() as session:
+    async with (SessionLocal() as session):
         try:
-            stmt = select(Product).options(selectinload(Product.images)).where(Product.id == product_id)
+            stmt = select(Product).options(selectinload(Product.images), selectinload(Product.categories)).where(
+                Product.id == product_id)
             result = await session.execute(stmt)
             product = result.scalars().first()
             if not product:
@@ -130,7 +145,8 @@ async def get_product_by_id(product_id: int):
 async def get_user_all_data(user_id):
     async with SessionLocal() as session:
         try:
-            stmt = select(User).options(selectinload(User.products).selectinload(Product.images)).where(
+            stmt = select(User).options(selectinload(User.products).selectinload(Product.images),
+                                        selectinload(User.products).selectinload(Product.categories)).where(
                 User.id == user_id)
             result = await session.execute(stmt)
             user = result.scalars().first()
@@ -196,7 +212,6 @@ async def get_random_products():
 async def redact_product(id, title, description, price, ):
     async with SessionLocal() as session:
         try:
-            print(type(id), id, 10 * "\n")
             old_product = await session.get(Product, id)
             # readcting all data about product
             old_product.title = title
@@ -260,3 +275,104 @@ async def db_delete_user(user_id, deletor):
         except DatabaseError:
             await session.rollback()
             raise HTTPException(status_code=500, detail="error while deleting user")
+
+
+async def db_create_category(category_name):
+    async with SessionLocal() as session:
+        try:
+            ctg = Category(name=category_name)
+            session.add(ctg)
+            await session.commit()
+            print("Category created successfully")
+            return True
+        except DatabaseError:
+            await session.rollback()
+            raise HTTPException(status_code=500, detail="error while creating category")
+
+
+async def get_categories():
+    async with SessionLocal() as session:
+        try:
+            stmt = select(Category)
+            categories = await session.execute(stmt)
+            categories = categories.scalars().all()
+            return categories
+        except DatabaseError:
+            raise HTTPException(status_code=500, detail="error while getting categories")
+
+
+async def get_ctg_by_id(ctg_id):
+    async with SessionLocal() as session:
+        try:
+            stmt = select(Category).where(Category.id == int(ctg_id))
+            result = await session.execute(stmt)
+            category = result.scalars().first()
+            return category
+        except DatabaseError:
+            raise HTTPException(status_code=500, detail="error while getting category")
+
+
+async def db_del_category(category_id):
+    async with SessionLocal() as session:
+        try:
+            stmt = select(Category).where(Category.id == category_id)
+            result = await session.execute(stmt)
+            category = result.scalars().first()
+            if category:
+                await session.delete(category)
+                await session.commit()
+                return True
+            else:
+                raise HTTPException(status_code=404, detail="no category found")
+        except DatabaseError:
+            await session.rollback()
+            raise HTTPException(status_code=500, detail="error while deleting category")
+
+
+async def dB_filteredrequest(categories, price_min, price_max):
+    async with SessionLocal() as session:
+        try:
+            print(categories, price_min, price_max, "ffffffff")
+            if categories:
+                # stmt = select(Product).order_by(asc(Product.price))
+                stmt = (
+                    select(Product)
+                    .join(Product.categories)
+                    .where(Category.id.in_(categories), Product.price > price_min, Product.price < price_max)
+                    .group_by(Product.id)
+                    .having(func.count(Category.id) == len(categories)).
+                    options(selectinload(Product.images),
+                            selectinload(Product.categories))
+                )
+            else:
+                stmt = (
+                    select(Product)
+                    .join(Product.categories)
+                    .where(Product.price > price_min, Product.price < price_max)
+                    .group_by(Product.id).
+                    options(selectinload(Product.images),
+                            selectinload(Product.categories))
+                )
+            result = await session.execute(stmt)
+            products = result.scalars().all()
+            return products
+        except DatabaseError:
+            raise HTTPException(status_code=500, detail="error while getting products")
+
+
+async def db_requests():
+    async with SessionLocal() as session:
+        try:
+            categories = []
+
+            stmt = (
+                select(Product)
+                .join(Product.categories)
+                .where(Category.id.in_(categories))
+                .group_by(Product.id)
+                .having(func.count(Category.id) == len(categories))
+            )
+            res = await session.execute(stmt)
+            res = res.scalars().all()
+        except DatabaseError as e:
+            raise e

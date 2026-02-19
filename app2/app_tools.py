@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 from fastapi import Depends, Body, HTTPException
 from typing import List, Optional, AnyStr
 import uuid
-from io_db_tools import get_user_all_data, Image
+
+from unicodedata import category
+
+from io_db_tools import get_user_all_data, dB_filteredrequest
 from PIL import Image as Img
 from io import BytesIO
 
@@ -38,10 +41,15 @@ class ImagePyd(BaseModel):
     image_url : str
 
 
+class CategoryPyd(BaseModel):
+    id: Optional[int] = None
+    name: str
+
 class ProductPyd(BaseModel):
     id : Optional[int] = None
     title: str
     description: str
+    categories: List[CategoryPyd] = None
     price: float
     owner_id: int
     main_url: Optional[str] = None
@@ -97,17 +105,19 @@ async def get_seller_products(user_id):
     products = []
     try:
         if user.products:
+
             products = [ProductPyd(
                 id=product.id,
                 title=product.title,
                 description=product.description,
+                category=product.categories,
                 price=product.price,
                 owner_id=user_id,
                 main_url=product.main_url,
                 images=[ImagePyd(product_id=product.id, image_url=img.image_url) for img in product.images if product.images])
                 for product in user.products]
     except Exception as e:
-            return []
+        return print(e)
     return products
 
 
@@ -121,3 +131,17 @@ def compress_image(file_bytes):
         out = BytesIO()
         img.save(out, "WEBP", quality=60)
         return out.getvalue()
+
+
+async def get_filtered_products(categories, price_min, price_max):
+    products = await dB_filteredrequest(categories, price_min, price_max)
+    products = [ProductPyd(
+        id=product.id,
+        title=product.title,
+        description=product.description,
+        price=product.price,
+        owner_id=product.owner_id,
+        main_url=product.main_url,
+        images=[ImagePyd(product_id=product.id, image_url=img.image_url) for img in product.images if product.images])
+        for product in products]
+    return products

@@ -130,6 +130,219 @@
           box-shadow: 0 18px 28px -8px #3a56d8 !important;
       }
 
+      .btn-filter {
+          background: rgba(255, 255, 255, 0.7) !important;
+      }
+
+      .btn-filter.active {
+          background: linear-gradient(145deg, var(--primary), var(--accent)) !important;
+          color: white !important;
+          border: none !important;
+      }
+
+      .btn-filter.active i {
+          color: white !important;
+      }
+
+      /* ----- MODAL STYLES ----- */
+      .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+      }
+
+      .modal-overlay.open {
+          opacity: 1;
+          visibility: visible;
+      }
+
+      .modal-content {
+          background: white;
+          border-radius: 24px;
+          padding: 32px;
+          max-width: 480px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          transform: translateY(20px);
+          transition: transform 0.3s ease;
+          box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+      }
+
+      .modal-overlay.open .modal-content {
+          transform: translateY(0);
+      }
+
+      .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+      }
+
+      .modal-header h2 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--text-heading);
+      }
+
+      .modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: var(--text-muted);
+          padding: 4px;
+          transition: color 0.2s;
+      }
+
+      .modal-close:hover {
+          color: var(--text-heading);
+      }
+
+      .filter-group {
+          margin-bottom: 20px;
+      }
+
+      .filter-group label {
+          display: block;
+          font-weight: 600;
+          color: var(--text-heading);
+          margin-bottom: 8px;
+          font-size: 0.95rem;
+      }
+
+      .filter-group input[type="text"],
+      .filter-group input[type="number"],
+      .filter-group select {
+          width: 100%;
+          padding: 12px 16px;
+          border: 1.5px solid rgba(67, 97, 238, 0.2);
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          background: rgba(255, 255, 255, 0.8);
+      }
+
+      .filter-group input:focus,
+      .filter-group select:focus {
+          outline: none;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+      }
+
+      .filter-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+      }
+
+      .category-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+      }
+
+      .category-chip {
+          padding: 8px 16px;
+          border-radius: 20px;
+          border: 1.5px solid rgba(67, 97, 238, 0.2);
+          background: rgba(255, 255, 255, 0.8);
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--text-body);
+          transition: all 0.2s ease;
+      }
+
+      .category-chip:hover {
+          border-color: var(--primary-light);
+          background: rgba(67, 97, 238, 0.05);
+      }
+
+      .category-chip.selected {
+          background: var(--primary);
+          color: white;
+          border-color: var(--primary);
+      }
+
+      .modal-actions {
+          display: flex;
+          gap: 12px;
+          margin-top: 28px;
+      }
+
+      .btn-apply {
+          flex: 2;
+          padding: 14px 24px;
+          background: linear-gradient(145deg, var(--primary), var(--accent));
+          color: white;
+          border: none;
+          border-radius: 60px;
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 12px 24px -10px rgba(67, 97, 238, 0.4);
+      }
+
+      .btn-apply:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 16px 28px -10px rgba(67, 97, 238, 0.5);
+      }
+
+      .btn-reset {
+          flex: 1;
+          padding: 14px 24px;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1.5px solid rgba(67, 97, 238, 0.2);
+          border-radius: 60px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--text-body);
+      }
+
+      .btn-reset:hover {
+          background: white;
+          border-color: var(--primary);
+          color: var(--primary);
+      }
+
+      .active-filters {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 16px;
+      }
+
+      .active-filter-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          background: rgba(67, 97, 238, 0.1);
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--primary);
+      }
+
+      .active-filter-tag i {
+          cursor: pointer;
+          font-size: 0.8rem;
+      }
+
       /* ----- СОВРЕМЕННАЯ GRID-СЕТКА (дышащая) ----- */
     .products-container {
       display: grid;
@@ -259,7 +472,22 @@
           letter-spacing: -0.2px;
           border: 1px solid rgba(67, 97, 238, 0.12);
           backdrop-filter: blur(4px);
-    }
+      }
+
+      .category-badge {
+          display: inline-block;
+          padding: 4px 10px;
+          background: rgba(123, 78, 227, 0.12);
+          color: var(--accent);
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-bottom: 6px;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
 
 
       .skeleton-card {
@@ -430,6 +658,10 @@
            style="font-size: 1.4rem; background: transparent; color: var(--primary); margin-right: 4px;"></i> ELITE
     </div>
   <div class="nav-buttons">
+      <button id="filter-btn" class="btn-filter" onclick="openFilterModal()">
+          <i class="fas fa-filter"></i> Filters
+          <span id="filter-count" class="hidden">0</span>
+      </button>
       <button onclick="goToMyProfile()"><i class="fas fa-user-circle"></i> Profile</button>
       <button class="btn-add" onclick="requireAuth('/create_product')"><i class="fas fa-plus-circle"></i> Add</button>
   </div>
@@ -446,6 +678,60 @@
     </button>
 </div>
 
+<!-- FILTER MODAL -->
+<div class="modal-overlay" id="filter-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-filter"></i> Фильтры</h2>
+            <button class="modal-close" onclick="closeFilterModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="active-filters" class="active-filters"></div>
+
+        <div class="filter-group">
+            <label>Поиск по названию</label>
+            <input type="text" id="filter-search" placeholder="Введите название товара...">
+        </div>
+
+        <div class="filter-group">
+            <label>Категории</label>
+            <div class="category-chips" id="category-chips">
+                <!-- Загружается динамически -->
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label>Цена</label>
+            <div class="filter-row">
+                <input type="number" id="filter-price-min" placeholder="От">
+                <input type="number" id="filter-price-max" placeholder="До">
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label>Сортировка</label>
+            <select id="filter-sort">
+                <option value="">По умолчанию</option>
+                <option value="price_asc">Цена: по возрастанию</option>
+                <option value="price_desc">Цена: по убыванию</option>
+                <option value="title_asc">Название: А-Я</option>
+                <option value="title_desc">Название: Я-А</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-reset" onclick="resetFilters()">
+                <i class="fas fa-undo"></i> Сбросить
+            </button>
+            <button class="btn-apply" onclick="applyFilters()">
+                <i class="fas fa-check"></i> Применить
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ============ ПОЛНОСТЬЮ СОХРАНЕНЫ ВСЕ ОРИГИНАЛЬНЫЕ API-МЕТОДЫ ============
   const API_URL = "";
@@ -453,6 +739,204 @@
 
   let skip = 0;
   const limit = 8;
+
+    // Filter state
+    let filterState = {
+        search: "",
+        categories: [],
+        priceMin: null,
+        priceMax: null,
+        sort: ""
+    };
+
+    // Load filter state from localStorage
+    function loadFilterState() {
+        const saved = localStorage.getItem("product_filters");
+        if (saved) {
+            try {
+                filterState = JSON.parse(saved);
+            } catch (e) {
+                console.error("Error loading filter state:", e);
+            }
+        }
+    }
+
+    // Save filter state to localStorage
+    function saveFilterState() {
+        localStorage.setItem("product_filters", JSON.stringify(filterState));
+        updateFilterButton();
+    }
+
+    // Update filter button appearance
+    function updateFilterButton() {
+        const filterBtn = document.getElementById("filter-btn");
+        const filterCount = document.getElementById("filter-count");
+        const hasFilters = filterState.search || filterState.categories.length ||
+            filterState.priceMin || filterState.priceMax || filterState.sort;
+
+        if (hasFilters) {
+            filterBtn.classList.add("active");
+            let count = 0;
+            if (filterState.search) count++;
+            if (filterState.categories.length) count++;
+            if (filterState.priceMin || filterState.priceMax) count++;
+            if (filterState.sort) count++;
+            filterCount.textContent = count;
+            filterCount.classList.remove("hidden");
+        } else {
+            filterBtn.classList.remove("active");
+            filterCount.classList.add("hidden");
+        }
+    }
+
+    // Open filter modal
+    function openFilterModal() {
+        const modal = document.getElementById("filter-modal");
+        modal.classList.add("open");
+        document.body.style.overflow = "hidden";
+        loadCategories();
+        populateFilterForm();
+    }
+
+    // Close filter modal
+    function closeFilterModal() {
+        const modal = document.getElementById("filter-modal");
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+    }
+
+    // Populate filter form with current state
+    function populateFilterForm() {
+        document.getElementById("filter-search").value = filterState.search || "";
+        document.getElementById("filter-price-min").value = filterState.priceMin || "";
+        document.getElementById("filter-price-max").value = filterState.priceMax || "";
+        document.getElementById("filter-sort").value = filterState.sort || "";
+
+        // Update category chips
+        document.querySelectorAll(".category-chip").forEach(chip => {
+            const catId = parseInt(chip.dataset.id);
+            chip.classList.toggle("selected", filterState.categories.includes(catId));
+        });
+
+        renderActiveFilters();
+    }
+
+    // Render active filters tags
+    function renderActiveFilters() {
+        const container = document.getElementById("active-filters");
+        container.innerHTML = "";
+
+        if (filterState.search) {
+            container.innerHTML += `<span class="active-filter-tag">Поиск: "${filterState.search}" <i class="fas fa-times" onclick="clearFilter('search')"></i></span>`;
+        }
+
+        if (filterState.categories.length) {
+            document.querySelectorAll(".category-chip.selected").forEach(chip => {
+                container.innerHTML += `<span class="active-filter-tag">${chip.textContent} <i class="fas fa-times" onclick="clearFilter('category', ${chip.dataset.id})"></i></span>`;
+            });
+        }
+
+        if (filterState.priceMin || filterState.priceMax) {
+            const priceText = `Цена: ${filterState.priceMin || "0"} - ${filterState.priceMax || "∞"}`;
+            container.innerHTML += `<span class="active-filter-tag">${priceText} <i class="fas fa-times" onclick="clearFilter('price')"></i></span>`;
+        }
+
+        if (filterState.sort) {
+            const sortText = document.querySelector(`#filter-sort option[value="${filterState.sort}"]`).textContent;
+            container.innerHTML += `<span class="active-filter-tag">${sortText} <i class="fas fa-times" onclick="clearFilter('sort')"></i></span>`;
+        }
+    }
+
+    // Clear specific filter
+    function clearFilter(type, value) {
+        if (type === "search") filterState.search = "";
+        if (type === "category") {
+            filterState.categories = filterState.categories.filter(c => c !== value);
+        }
+        if (type === "price") {
+            filterState.priceMin = null;
+            filterState.priceMax = null;
+        }
+        if (type === "sort") filterState.sort = "";
+
+        saveFilterState();
+        populateFilterForm();
+    }
+
+    // Load categories from API
+    async function loadCategories() {
+        const container = document.getElementById("category-chips");
+        if (container.children.length > 0) return;
+
+        try {
+            const response = await fetch(`${API_URL}/get-categories`);
+            const data = await response.json();
+            const categories = data.categories || [];
+
+            container.innerHTML = categories.map(cat =>
+                `<div class="category-chip" data-id="${cat.id}" onclick="toggleCategory(${cat.id}, this)">${cat.name}</div>`
+            ).join("");
+        } catch (e) {
+            console.error("Error loading categories:", e);
+            container.innerHTML = "<p style='color: var(--text-muted);'>Не удалось загрузить категории</p>";
+        }
+    }
+
+    // Toggle category selection
+    function toggleCategory(catId, element) {
+        element.classList.toggle("selected");
+        const isSelected = element.classList.contains("selected");
+
+        if (isSelected) {
+            if (!filterState.categories.includes(catId)) {
+                filterState.categories.push(catId);
+            }
+        } else {
+            filterState.categories = filterState.categories.filter(c => c !== catId);
+        }
+        renderActiveFilters();
+    }
+
+    // Apply filters
+    function applyFilters() {
+        filterState.search = document.getElementById("filter-search").value.trim();
+        filterState.priceMin = parseFloat(document.getElementById("filter-price-min").value) || null;
+        filterState.priceMax = parseFloat(document.getElementById("filter-price-max").value) || null;
+        filterState.sort = document.getElementById("filter-sort").value;
+
+        saveFilterState();
+        skip = 0;
+        fetchProducts();
+        closeFilterModal();
+    }
+
+    // Reset all filters
+    function resetFilters() {
+        filterState = {
+            search: "",
+            categories: [],
+            priceMin: null,
+            priceMax: null,
+            sort: ""
+        };
+        saveFilterState();
+        populateFilterForm();
+        skip = 0;
+        fetchProducts();
+    }
+
+    // Build filter query string
+    function buildFilterQuery() {
+        const params = new URLSearchParams();
+
+        if (filterState.search) params.append("search", filterState.search);
+        if (filterState.categories.length) params.append("categories", filterState.categories.join(","));
+        if (filterState.priceMin) params.append("price_min", filterState.priceMin);
+        if (filterState.priceMax) params.append("price_max", filterState.priceMax);
+        if (filterState.sort) params.append("sort", filterState.sort);
+
+        return params.toString();
+    }
 
     // --- Оригинальные функции (без изменений) ---
     async function goToMyProfile() {
@@ -538,7 +1022,12 @@
       }
 
     try {
-      const response = await fetch(`${API_URL}/get-products?skip=${skip}&limit=${limit}`);
+        // Build URL with filters
+        const filterParams = buildFilterQuery();
+        const baseUrl = filterParams ? `${API_URL}/get-products-filtered` : `${API_URL}/get-products`;
+        const url = `${baseUrl}?skip=${skip}&limit=${limit}${filterParams ? '&' + filterParams : ''}`;
+
+        const response = await fetch(url);
       const data = await response.json();
 
         // Удаляем скелетоны перед отрисовкой реальных карточек
@@ -574,6 +1063,7 @@
           </div>
           <div class="info">
             <h3>${product.title || 'Untitled'}</h3>
+            ${product.categories && product.categories.length > 0 ? `<span class="category-badge">${product.categories[0].name}</span>` : ''}
             <div class="price-tag">
               <i class="fas fa-tag" style="font-size: 0.8rem; margin-right: 4px;"></i>
               $${product.price?.toLocaleString() || '0'}
@@ -618,7 +1108,10 @@
     document.head.appendChild(styleSheet);
 
     // Запуск при загрузке DOM
-  document.addEventListener("DOMContentLoaded", fetchProducts);
+    document.addEventListener("DOMContentLoaded", function () {
+        loadFilterState();
+        fetchProducts();
+    });
 </script>
 
 </body>

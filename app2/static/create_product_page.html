@@ -497,6 +497,15 @@
     <textarea id="description" placeholder="Опишите ваш товар подробно..." required></textarea>
   </div>
 
+    <!-- Категории -->
+    <div class="form-group">
+        <label><i class="fas fa-tags"></i> Категории</label>
+        <div id="categories-container"></div>
+        <button type="button" id="add-category-btn" class="btn-secondary" style="display: none; margin-top: 12px;">
+            <i class="fas fa-plus"></i> Добавить еще категорию
+        </button>
+    </div>
+
     <!-- Главное изображение (стильный file input) -->
   <div class="form-group">
       <label><i class="fas fa-camera"></i> Главное изображение</label>
@@ -566,6 +575,72 @@
       container.appendChild(wrapper);
   });
 
+    // Загрузка категорий
+    let allCategories = [];
+
+    async function loadCategories() {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch(`${API_URL}/get-categories`, {
+                headers: {"Authorization": `Bearer ${token}`}
+            });
+            if (response.ok) {
+                const data = await response.json();
+                allCategories = data.categories || [];
+                addCategorySelect(true);
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+
+    function addCategorySelect(required = false) {
+        const container = document.getElementById("categories-container");
+        const selectId = `category_${Date.now()}`;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "category-select-wrapper";
+        wrapper.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
+
+        const select = document.createElement("select");
+        select.id = selectId;
+        select.style.cssText = "flex: 1; padding: 12px 16px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.7); font-size: 0.98rem; font-family: 'Inter', sans-serif;";
+        select.innerHTML = `<option value="">${required ? '* Выберите категорию' : 'Выберите категорию'}</option>` +
+            allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        if (required) {
+            select.required = true;
+        }
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.style.cssText = "background: rgba(239,68,68,0.1); border: none; color: #dc2626; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;";
+        removeBtn.onclick = () => {
+            wrapper.remove();
+            updateAddCategoryBtn();
+        };
+
+        wrapper.appendChild(select);
+        wrapper.appendChild(removeBtn);
+        container.appendChild(wrapper);
+
+        updateAddCategoryBtn();
+    }
+
+    function updateAddCategoryBtn() {
+        const container = document.getElementById("categories-container");
+        const selects = container.querySelectorAll("select");
+        const addBtn = document.getElementById("add-category-btn");
+        addBtn.style.display = selects.length > 0 ? "flex" : "none";
+    }
+
+    document.getElementById("add-category-btn").addEventListener("click", () => {
+        addCategorySelect(false);
+    });
+
     // Основная функция создания товара (без изменений в логике)
   async function createProduct() {
     const title = document.getElementById("title").value.trim();
@@ -606,6 +681,21 @@
         }
       });
 
+        // Собираем категории
+        const categorySelects = document.querySelectorAll('#categories-container select');
+        const categories = [];
+        categorySelects.forEach(select => {
+            if (select.value) {
+                categories.push(select.value);
+            }
+        });
+        if (categories.length === 0) {
+            messageDiv.classList.add("error");
+            messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Выберите хотя бы одну категорию!';
+            return;
+        }
+        formData.append("category", categories);
+
       const response = await fetch(`${API_URL}/create-product`, {
         method: "POST",
         headers: {
@@ -626,6 +716,8 @@
         document.getElementById("description").value = "";
           document.getElementById("main_image").value = "";
         document.getElementById("extra-images-container").innerHTML = "";
+          document.getElementById("categories-container").innerHTML = "";
+          addCategorySelect(true);
       } else {
           messageDiv.classList.add("error");
           messageDiv.innerHTML = `<i class="fas fa-times-circle"></i> ${data.detail || "Ошибка при добавлении."}`;
@@ -649,6 +741,9 @@
             }
         }
     });
+
+    // Загружаем категории при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadCategories);
 </script>
 
 </body>

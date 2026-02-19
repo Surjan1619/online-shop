@@ -9,7 +9,7 @@ from app_tools import get_uniq_filename
 from typing import List, Optional
 
 import os
-from io_db_tools import Product, Image, create_image, create_product
+from io_db_tools import Product, Image, ProductCategory, create_image, create_product, get_ctg_by_id
 
 MEDIA_FOLDER = "media/images"
 product_queue = asyncio.Queue()
@@ -32,6 +32,7 @@ async def product_worker():
         data = await product_queue.get()
         title = data["title"]
         description = data["description"]
+        categories = data["category"]  # list(id)
         price = data["price"]
         main_image = data["main_image"]
         images = data["images"]
@@ -46,9 +47,13 @@ async def product_worker():
             buffer.write(compressed_image)
         # getting user id and creating SQL alchemy model of the product to add itinto database
         user_id = user
+        ctgies = []
+        for catg in categories:
+            ctgies.append(await get_ctg_by_id(catg))
         product = Product(
             title=title,
             description=description,
+            categories=ctgies,
             price=price,
             owner_id=user_id,
             main_url=file_path

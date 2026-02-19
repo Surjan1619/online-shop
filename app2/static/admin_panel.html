@@ -519,6 +519,24 @@
             <span class="page-info" id="usersPageInfo">Page 1</span>
             <button class="btn-page" id="nextUsers">Next →</button>
         </div>
+
+        <h2 class="section-title">
+            <i class="fas fa-tags"></i> Categories
+        </h2>
+
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                <input type="text" id="newCategoryName" placeholder="Category name"
+                       style="flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid rgba(67, 97, 238, 0.2); border-radius: 12px; font-size: 1rem;">
+                <button class="btn-page" onclick="createCategory()">Add Category</button>
+            </div>
+            <div id="categoriesContainer">
+                <div class="loading" id="loadingCategories">
+                    <div class="spinner"></div>
+                    Loading categories...
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -746,6 +764,126 @@
         }
     });
 
+    async function loadCategories() {
+        const token = getToken();
+        if (!token) return;
+
+        const loadingEl = document.getElementById('loadingCategories');
+        const container = document.getElementById('categoriesContainer');
+
+        try {
+            const response = await fetch(`${API_BASE}/get-categories`, {
+                headers: {'Authorization': `Bearer ${token}`}
+            });
+
+            if (!response.ok) throw new Error('Failed to load');
+
+            const data = await response.json();
+            const categories = data.categories || [];
+
+            if (categories.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i><br>No categories found</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${categories.map((cat, idx) => `
+                                <tr>
+                                    <td><span class="badge-id">#${cat.id}</span></td>
+                                    <td>${escapeHtml(cat.name)}</td>
+                                    <td>
+                                        <span class="delete-cell" onclick="deleteCategory(${cat.id})">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i>Failed to load categories</div>';
+        }
+    }
+
+    async function createCategory() {
+        const token = getToken();
+        if (!token) {
+            redirectToLogin();
+            return;
+        }
+
+        const nameInput = document.getElementById('newCategoryName');
+        const categoryName = nameInput.value.trim();
+
+        if (!categoryName) {
+            showAlert('Please enter a category name', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/create-category?category_name=${encodeURIComponent(categoryName)}`, {
+                method: 'POST',
+                headers: {'Authorization': `Bearer ${token}`}
+            });
+
+            if (response.status === 401) {
+                redirectToLogin();
+                return;
+            }
+
+            if (!response.ok) throw new Error('Failed to create');
+
+            showAlert('Category created successfully', 'success');
+            nameInput.value = '';
+            loadCategories();
+        } catch (error) {
+            console.error('Create category error:', error);
+            showAlert('Error creating category', 'error');
+        }
+    }
+
+    async function deleteCategory(categoryId) {
+        if (!confirm(`Are you sure you want to delete category #${categoryId}?`)) return;
+
+        const token = getToken();
+        if (!token) {
+            redirectToLogin();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/delete-category?category_id=${categoryId}`, {
+                method: 'DELETE',
+                headers: {'Authorization': `Bearer ${token}`}
+            });
+
+            if (response.status === 401) {
+                redirectToLogin();
+                return;
+            }
+
+            if (!response.ok) throw new Error('Failed to delete');
+
+            showAlert(`Category #${categoryId} deleted successfully`, 'success');
+            loadCategories();
+        } catch (error) {
+            console.error('Delete category error:', error);
+            showAlert('Error deleting category', 'error');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         const token = getToken();
         if (!token) {
@@ -777,6 +915,7 @@
 
         loadStats();
         loadUsers(0);
+        loadCategories();
     });
 </script>
 

@@ -17,7 +17,9 @@ from app_tools import (UserPyd,
                        ProductPyd, ImagePyd,
                        token_decode,
                        get_seller_products,
-                       compress_image)
+                       compress_image,
+                       CategoryPyd,
+                       get_filtered_products)
 from io_db_tools import (User, Product, Image,
                          create_user,
                          check_logining_user,
@@ -29,7 +31,11 @@ from io_db_tools import (User, Product, Image,
                          redact_product,
                          delete_product,
                          get_users_list,
-                         db_delete_user)
+                         db_delete_user,
+                         db_create_category,
+                         get_categories,
+                         db_del_category,
+                         dB_filteredrequest)
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
@@ -120,10 +126,14 @@ async def get_product_id(product_id: int):
     product = await get_product_by_id(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    for ctg in product.categories:
+        print(ctg.name, ctg.id)
+    categories = [CategoryPyd(id=cat.id, name=cat.name) for cat in product.categories] if product.categories else []
     product = ProductPyd(
         id=product.id,
         title=product.title,
         description=product.description,
+        categories=categories,
         price=product.price,
         owner_id=product.owner_id,
         main_url=product.main_url,
@@ -142,11 +152,13 @@ async def create_product_page():
 async def get_product_data(
         title: str = Form(...),
         description: str = Form(...),
+        category: List = Form(...),
         price: float = Form(...),
         main_image: UploadFile = File(...),
         images : Optional[List[UploadFile]] = File(None),
         user = Depends(oauth2_scheme),
 ):
+    category = category[0].split(",")
     main_image = {"file": await main_image.read(), "filename": main_image.filename}
     images_lst = []
     if images:
@@ -158,6 +170,7 @@ async def get_product_data(
     os.makedirs(MEDIA_FOLDER, exist_ok=True)
     await product_queue.put({"title": title,
                              "description": description,
+                             "category": category,
                              "price": price,
                              "main_image": main_image,
                              "images": images_lst,
@@ -216,6 +229,7 @@ async def user_profile(id: int, token: str = Depends(oauth2_scheme)):
     else:
         user_id = token_decode(token)['sub']
         products = await get_seller_products(id)
+
         if id == int(user_id) or await get_user(user_id) == "Admin":
             role = "owner"
             print("owner entered")
@@ -233,7 +247,6 @@ async def go_admin_panel():
 
 @app.get("/get-users")
 async def get_us(offset: int = 0, token: str = Depends(oauth2_scheme)):
-    print("ohyoppooooooooooo")
     if await get_user(token_decode(token, key="get_user")) == "Admin":
         users = await get_users_list(offset)
         return {"userlist": users}
@@ -247,3 +260,36 @@ async def del_user(user_id, token: str = Depends(oauth2_scheme)):
         user = await get_user(token_decode(token, key="get_user"))
         await db_delete_user(int(user_id), user)
         return {"status": "ok", }
+
+
+@app.post("/create-category")
+async def cr_ctgr(category_name: str, token: str = Depends(oauth2_scheme)):
+    if await get_user(token_decode(token, key="get_user")) == "Admin":
+        if await db_create_category(category_name):
+            return {"status": "ok", }
+
+
+@app.get("/get-categories")
+async def get_ctg():
+    categories = await get_categories()
+    result = []
+    for ctg in categories:
+        result.append({"id": ctg.id, "name": ctg.name})
+    return {"categories": result}
+
+
+@app.delete("/delete-category")
+async def del_ctg(category_id: int, token: str = Depends(oauth2_scheme)):
+    if await get_user(token_decode(token, key="get_user")) == "Admin":
+        await db_del_category(int(category_id))
+        return {"status": "ok", }
+    else:
+        raise HTTPException(status_code=401, detail="no permisions")
+
+
+@app.get("/get-products-filtered")
+async def get_pr_filtred(categories: str = '', price_min: int = 1, price_max: int = 1500000):
+    categories = categories.split(",") if categories else None
+    categories = [int(i) for i in categories]
+    result = await get_filtered_products(categories, price_min=price_min, price_max=price_max)
+    return {"products": result}
