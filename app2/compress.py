@@ -7,7 +7,7 @@ from fastapi.exceptions import HTTPException
 from fastapi import UploadFile, Form, Depends, File
 from app_tools import get_uniq_filename
 from typing import List, Optional
-
+from time import sleep
 import os
 from io_db_tools import Product, Image, ProductCategory, create_image, create_product, get_ctg_by_id
 
@@ -30,6 +30,7 @@ def compress_image(file_bytes):
 async def product_worker():
     while True:
         data = await product_queue.get()
+
         title = data["title"]
         description = data["description"]
         categories = data["category"]  # list(id)
@@ -73,4 +74,4 @@ async def product_worker():
                 with open(file_path, "wb") as buffer:
                     buffer.write(compressed_image)
                 await create_image(Image(product_id=product, image_url=file_path))
-        return {"status": "ok"}
+        product_queue.task_done()

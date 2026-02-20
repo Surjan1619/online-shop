@@ -36,7 +36,8 @@ from io_db_tools import (User, Product, Image,
                          get_categories,
                          db_del_category,
                          dB_filteredrequest)
-
+import threading
+import time
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -98,7 +99,6 @@ async def login(user_data: UserPyd):
         #creating token with user ID
         token = create_access_token({"sub" : user_id})
         #returning user new token
-        print(token)
         return {"access_token": token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -126,8 +126,6 @@ async def get_product_id(product_id: int):
     product = await get_product_by_id(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    for ctg in product.categories:
-        print(ctg.name, ctg.id)
     categories = [CategoryPyd(id=cat.id, name=cat.name) for cat in product.categories] if product.categories else []
     product = ProductPyd(
         id=product.id,
@@ -175,6 +173,7 @@ async def get_product_data(
                              "main_image": main_image,
                              "images": images_lst,
                              "user": user})
+
     return {"status": "processing"}
 
 
