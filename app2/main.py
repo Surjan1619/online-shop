@@ -290,6 +290,5 @@ async def del_ctg(category_id: int, token: str = Depends(oauth2_scheme)):
 @app.get("/get-products-filtered")
 async def get_pr_filtred(categories: str = '', price_min: int = 1, price_max: int = 1500000):
     categories = categories.split(",") if categories else None
-    categories = [int(i) for i in categories]
     result = await get_filtered_products(categories, price_min=price_min, price_max=price_max)
     return {"products": result}

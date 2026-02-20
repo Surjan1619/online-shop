@@ -334,6 +334,7 @@ async def dB_filteredrequest(categories, price_min, price_max):
         try:
             print(categories, price_min, price_max, "ffffffff")
             if categories:
+                categories = [int(i) for i in categories]
                 # stmt = select(Product).order_by(asc(Product.price))
                 stmt = (
                     select(Product)
