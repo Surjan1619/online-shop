@@ -172,9 +172,13 @@ async def get_user(data):
             raise HTTPException(status_code=500, detail="error while getting user")
 
 
-async def create_product(product: Product):
+async def create_product(product: Product, categories: List):
     async with SessionLocal() as session:
         try:
+            ctg = []
+            for i in categories:
+                ctg.append(await session.get(Category, int(i)))
+            product.categories = ctg
             session.add(product)
             await session.commit()
             await session.refresh(product)

@@ -48,19 +48,19 @@ async def product_worker():
             buffer.write(compressed_image)
         # getting user id and creating SQL alchemy model of the product to add itinto database
         user_id = user
-        ctgies = []
-        for catg in categories:
-            ctgies.append(await get_ctg_by_id(catg))
+        # ctgies = []
+        # for catg in categories:
+        #     ctgies.append(await get_ctg_by_id(catg))
+
         product = Product(
             title=title,
             description=description,
-            categories=ctgies,
             price=price,
             owner_id=user_id,
             main_url=file_path
         )
         # adding prodict into DB and getting his ID
-        product = await create_product(product)
+        product = await create_product(product, categories)
         if images:
             for image in images:
                 compressed_image = compress_image(image["file"])
